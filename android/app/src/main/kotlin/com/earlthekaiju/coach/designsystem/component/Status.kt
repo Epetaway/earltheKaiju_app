@@ -108,9 +108,9 @@ fun LiveDot(modifier: Modifier = Modifier, color: Color = Kaiju.colors.live, siz
         1f
     }
     Canvas(modifier.size(size).alpha(alpha).clearAndSetSemantics { }) {
-        // A diamond: the crest's geometry at bullet size.
-        val w = size.width
-        val h = size.height
+        // A diamond: the crest's geometry at bullet size. (`this.size` is the canvas, not the parameter.)
+        val w = this.size.width
+        val h = this.size.height
         val p = androidx.compose.ui.graphics.Path().apply {
             moveTo(w / 2f, 0f)
             lineTo(w, h / 2f)
