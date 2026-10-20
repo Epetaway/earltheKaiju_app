@@ -30,6 +30,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.earlthekaiju.coach.data.db.SessionNoteEntity
 import com.earlthekaiju.coach.data.db.SessionSummary
+import com.earlthekaiju.coach.designsystem.component.ButtonPair
 import com.earlthekaiju.coach.designsystem.component.ButtonSize
 import com.earlthekaiju.coach.designsystem.component.ButtonVariant
 import com.earlthekaiju.coach.designsystem.component.ErrorState
@@ -185,17 +186,15 @@ fun SessionDetailScreen(state: SessionDetailUiState, actions: SessionDetailActio
                         }
                         else -> Unit
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(KaijuSpace.s)) {
-                        if (s.session.status != SessionStatus.CANCELED) {
-                            KaijuButton(
-                                "Attendance · ${s.presentCount}/${s.expectedCount}",
-                                { actions.onAttendance(s.session.id) },
-                                Modifier.weight(1f),
-                                variant = ButtonVariant.Secondary,
-                                icon = KaijuIcons.Attendance,
-                            )
-                        }
-                        KaijuButton("Add note", { noteSheet = true }, Modifier.weight(1f), variant = ButtonVariant.Secondary, icon = KaijuIcons.Note)
+                    if (s.session.status != SessionStatus.CANCELED) {
+                        ButtonPair(
+                            first = { m ->
+                                KaijuButton("Attendance ${s.presentCount}/${s.expectedCount}", { actions.onAttendance(s.session.id) }, m, variant = ButtonVariant.Secondary)
+                            },
+                            second = { m -> KaijuButton("Add note", { noteSheet = true }, m, variant = ButtonVariant.Secondary) },
+                        )
+                    } else {
+                        KaijuButton("Add note", { noteSheet = true }, Modifier.fillMaxWidth(), variant = ButtonVariant.Secondary, icon = KaijuIcons.Note)
                     }
 
                     val planId = s.session.lessonPlanId?.takeIf { s.session.status == SessionStatus.SCHEDULED }

@@ -137,14 +137,12 @@ fun KaijuBottomBar(
                         modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.height(KaijuSpace.xxs))
-                    Text(
+                    FitText(
                         item.label,
                         style = Kaiju.type.navLabel,
                         color = if (selected) colors.ink else colors.inkMuted,
                         textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 2.dp, vertical = 0.dp),
+                        modifier = Modifier.padding(horizontal = 2.dp),
                     )
                     Spacer(Modifier.height(KaijuSpace.xs))
                 }
@@ -198,7 +196,7 @@ fun KaijuNavRail(
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(item.icon, contentDescription = null, tint = if (selected) colors.ink else colors.inkMuted, modifier = Modifier.size(24.dp))
                         Spacer(Modifier.height(KaijuSpace.xxs))
-                        Text(item.label, style = Kaiju.type.navLabel, color = if (selected) colors.ink else colors.inkMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        FitText(item.label, style = Kaiju.type.navLabel, color = if (selected) colors.ink else colors.inkMuted, modifier = Modifier.padding(horizontal = 2.dp))
                     }
                 }
             }

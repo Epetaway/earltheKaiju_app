@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -103,7 +104,14 @@ fun KaijuButton(
                 role = Role.Button,
                 onClick = onClick,
             )
-            .padding(horizontal = if (variant == ButtonVariant.Ghost) KaijuSpace.s else KaijuSpace.l),
+            .padding(
+                horizontal = when {
+                    variant == ButtonVariant.Ghost -> KaijuSpace.s
+                    size == ButtonSize.Hero -> KaijuSpace.l
+                    else -> KaijuSpace.m
+                },
+                vertical = KaijuSpace.xs,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
@@ -111,12 +119,14 @@ fun KaijuButton(
                 Icon(icon, contentDescription = null, tint = content.copy(alpha = alpha), modifier = Modifier.size(if (size == ButtonSize.Hero) 26.dp else 20.dp))
                 Spacer(Modifier.width(KaijuSpace.xs + 2.dp))
             }
+            // Labels wrap to a second line rather than truncate (large fonts, narrow pairs).
             Text(
                 text = text,
                 style = if (size == ButtonSize.Hero) Kaiju.type.title else Kaiju.type.labelL,
                 color = content.copy(alpha = alpha),
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
         }
     }

@@ -42,7 +42,9 @@ import com.earlthekaiju.coach.data.db.RosterRow
 import com.earlthekaiju.coach.data.db.SessionSummary
 import com.earlthekaiju.coach.data.db.StudentListItem
 import com.earlthekaiju.coach.designsystem.component.AttendanceRow
+import com.earlthekaiju.coach.designsystem.component.ButtonPair
 import com.earlthekaiju.coach.designsystem.component.ButtonSize
+import com.earlthekaiju.coach.designsystem.component.FitText
 import com.earlthekaiju.coach.designsystem.component.ButtonVariant
 import com.earlthekaiju.coach.designsystem.component.EmptyState
 import com.earlthekaiju.coach.designsystem.component.Eyebrow
@@ -199,29 +201,15 @@ fun AttendanceScreen(state: AttendanceUiState, actions: AttendanceActions) {
                 Totals(state, Modifier.readableWidth().padding(horizontal = KaijuSpace.gutter, vertical = KaijuSpace.m))
             }
             item(key = "bulk") {
-                Row(
+                ButtonPair(
                     Modifier.readableWidth().padding(horizontal = KaijuSpace.gutter),
-                    horizontalArrangement = Arrangement.spacedBy(KaijuSpace.s),
-                ) {
-                    KaijuButton(
-                        "All present",
-                        actions.onMarkAllPresent,
-                        Modifier.weight(1f),
-                        variant = ButtonVariant.Secondary,
-                        size = ButtonSize.Compact,
-                        icon = KaijuIcons.Check,
-                        enabled = state.unmarked > 0,
-                    )
-                    KaijuButton(
-                        "Add drop-in",
-                        { dropIn = true },
-                        Modifier.weight(1f),
-                        variant = ButtonVariant.Secondary,
-                        size = ButtonSize.Compact,
-                        icon = KaijuIcons.Add,
-                        enabled = state.others.isNotEmpty(),
-                    )
-                }
+                    first = { m ->
+                        KaijuButton("All present", actions.onMarkAllPresent, m, variant = ButtonVariant.Secondary, size = ButtonSize.Compact, icon = KaijuIcons.Check, enabled = state.unmarked > 0)
+                    },
+                    second = { m ->
+                        KaijuButton("Add drop-in", { dropIn = true }, m, variant = ButtonVariant.Secondary, size = ButtonSize.Compact, icon = KaijuIcons.Add, enabled = state.others.isNotEmpty())
+                    },
+                )
                 Spacer(Modifier.height(KaijuSpace.s))
                 HairlineDivider(Modifier.readableWidth())
             }
@@ -290,7 +278,7 @@ private fun Totals(state: AttendanceUiState, modifier: Modifier) {
 private fun Total(label: String, value: Int, color: androidx.compose.ui.graphics.Color, modifier: Modifier) {
     Column(modifier) {
         Text(value.toString(), style = Kaiju.type.numeralL, color = color)
-        Eyebrow(label, color = Kaiju.colors.inkMuted)
+        FitText(label.uppercase(), style = Kaiju.type.eyebrow, color = Kaiju.colors.inkMuted)
     }
 }
 

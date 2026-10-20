@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,7 +33,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.earlthekaiju.coach.data.db.SessionSummary
+import com.earlthekaiju.coach.designsystem.component.ButtonPair
 import com.earlthekaiju.coach.designsystem.component.ButtonSize
+import com.earlthekaiju.coach.designsystem.component.FitText
+import com.earlthekaiju.coach.designsystem.component.isLargeFont
 import com.earlthekaiju.coach.designsystem.component.ButtonVariant
 import com.earlthekaiju.coach.designsystem.component.ClassCard
 import com.earlthekaiju.coach.designsystem.component.EmptyState
@@ -218,15 +222,15 @@ fun TodayScreen(state: TodayUiState, actions: TodayActions, modifier: Modifier =
                 )
             }
         }
-        item(key = "plan-ahead") {
+        if (featured != null || state.otherToday.isNotEmpty()) item(key = "plan-ahead") {
             val index = 1 + (if (featured != null) 1 else 0) + (if (state.otherToday.isNotEmpty()) 1 else 0)
             Column(Modifier.readableWidth().padding(top = KaijuSpace.xl)) {
                 SectionHeader(title = "Plan ahead", index = index)
                 Spacer(Modifier.height(KaijuSpace.s))
-                Row(horizontalArrangement = Arrangement.spacedBy(KaijuSpace.s)) {
-                    KaijuButton("Schedule class", actions.onScheduleClass, Modifier.weight(1f), variant = ButtonVariant.Secondary, icon = KaijuIcons.Add)
-                    KaijuButton("New lesson", actions.onNewLesson, Modifier.weight(1f), variant = ButtonVariant.Secondary, icon = KaijuIcons.Lessons)
-                }
+                ButtonPair(
+                    first = { m -> KaijuButton("Schedule class", actions.onScheduleClass, m, variant = ButtonVariant.Secondary) },
+                    second = { m -> KaijuButton("New lesson", actions.onNewLesson, m, variant = ButtonVariant.Secondary) },
+                )
                 if (state.lessonPlanCount > 0) {
                     Spacer(Modifier.height(KaijuSpace.xs))
                     KaijuButton(
@@ -285,8 +289,13 @@ private fun FeaturedClassCard(state: TodayUiState, actions: TodayActions, modifi
         accentEdge = if (live) colors.live else programColorValue(s.programColor),
         contentPadding = KaijuSpace.m,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Eyebrow(s.programName ?: "No program", Modifier.weight(1f))
+        FlowRow(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(KaijuSpace.xxs),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            Eyebrow(s.programName ?: "No program", Modifier.padding(end = KaijuSpace.s))
             SessionStatusBadge(s.session.status)
         }
         Spacer(Modifier.height(KaijuSpace.s))
@@ -302,24 +311,18 @@ private fun FeaturedClassCard(state: TodayUiState, actions: TodayActions, modifi
             Text(s.session.title, style = Kaiju.type.label, color = colors.inkMuted)
         }
         Spacer(Modifier.height(KaijuSpace.m))
-        // Editorial data row: three facts separated by hairlines, not three rounded stat cards.
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-            Fact(
-                label = if (s.session.date == state.date) "Starts" else Format.relativeDay(s.session.date, state.date),
-                value = Format.timeNumerals(s.session.startTime, use24h),
-                suffix = Format.meridiem(s.session.startTime, use24h),
-                modifier = Modifier.weight(1.2f),
-            )
-            Box(Modifier.width(1.dp).fillMaxHeight().background(colors.line))
-            Fact("Length", s.session.durationMinutes.toString(), "min", Modifier.weight(1f).padding(start = KaijuSpace.s))
-            Box(Modifier.width(1.dp).fillMaxHeight().background(colors.line))
-            Fact(
-                label = if (live) "Present" else "Expected",
-                value = (if (live) s.presentCount else s.expectedCount).toString(),
-                suffix = if (live) "of ${s.expectedCount}" else "",
-                modifier = Modifier.weight(1f).padding(start = KaijuSpace.s),
-            )
-        }
+        FactRow(
+            listOf(
+                FactData(
+                    label = if (s.session.date == state.date) "Starts" else Format.relativeDay(s.session.date, state.date),
+                    value = Format.timeNumerals(s.session.startTime, use24h),
+                    suffix = Format.meridiem(s.session.startTime, use24h),
+                ),
+                FactData("Length", s.session.durationMinutes.toString(), "min"),
+                if (live) FactData("Present", s.presentCount.toString(), "of ${s.expectedCount}")
+                else FactData("Expected", s.expectedCount.toString(), ""),
+            ),
+        )
         val startsIn = Duration.between(state.now, s.session.date.atTime(s.session.startTime)).toMinutes()
         if (!live && s.session.date == state.date && startsIn in 0..180) {
             Spacer(Modifier.height(KaijuSpace.xs))
@@ -333,8 +336,22 @@ private fun FeaturedClassCard(state: TodayUiState, actions: TodayActions, modifi
                 )
             }
         }
+        // The one dominant action sits high in the card so it is visible without scrolling.
+        Spacer(Modifier.height(KaijuSpace.m))
+        KaijuButton(
+            text = if (live) "Resume class" else "Start class",
+            onClick = { actions.onStartClass(s.session.id) },
+            modifier = Modifier.fillMaxWidth(),
+            size = ButtonSize.Hero,
+            icon = KaijuIcons.Play,
+        )
+        Spacer(Modifier.height(KaijuSpace.s))
+        ButtonPair(
+            first = { m -> KaijuButton("Attendance", { actions.onAttendance(s.session.id) }, m, variant = ButtonVariant.Secondary, size = ButtonSize.Compact) },
+            second = { m -> KaijuButton("Details", { actions.onOpenSession(s.session.id) }, m, variant = ButtonVariant.Secondary, size = ButtonSize.Compact) },
+        )
         state.featuredObjective?.let {
-            Spacer(Modifier.height(KaijuSpace.m))
+            Spacer(Modifier.height(KaijuSpace.l))
             Eyebrow("Objective", color = colors.inkMuted)
             Spacer(Modifier.height(KaijuSpace.xxs))
             Text(it, style = Kaiju.type.bodyL, color = colors.ink)
@@ -357,18 +374,38 @@ private fun FeaturedClassCard(state: TodayUiState, actions: TodayActions, modifi
             Spacer(Modifier.height(KaijuSpace.m))
             Text("No lesson plan attached yet.", style = Kaiju.type.bodyS, color = colors.inkMuted)
         }
-        Spacer(Modifier.height(KaijuSpace.l))
-        KaijuButton(
-            text = if (live) "Resume class" else "Start class",
-            onClick = { actions.onStartClass(s.session.id) },
-            modifier = Modifier.fillMaxWidth(),
-            size = ButtonSize.Hero,
-            icon = KaijuIcons.Play,
-        )
-        Spacer(Modifier.height(KaijuSpace.s))
-        Row(horizontalArrangement = Arrangement.spacedBy(KaijuSpace.s)) {
-            KaijuButton("Attendance", { actions.onAttendance(s.session.id) }, Modifier.weight(1f), variant = ButtonVariant.Secondary, icon = KaijuIcons.Attendance)
-            KaijuButton("Details", { actions.onOpenSession(s.session.id) }, Modifier.weight(1f), variant = ButtonVariant.Secondary)
+    }
+}
+
+data class FactData(val label: String, val value: String, val suffix: String)
+
+/**
+ * Editorial data row: facts separated by hairlines, not rounded stat cards.
+ * Stacks into labeled lines when the font is large so nothing truncates.
+ */
+@Composable
+fun FactRow(facts: List<FactData>, modifier: Modifier = Modifier) {
+    val colors = Kaiju.colors
+    if (isLargeFont()) {
+        Column(modifier.fillMaxWidth()) {
+            facts.forEachIndexed { i, f ->
+                Row(Modifier.fillMaxWidth().padding(vertical = KaijuSpace.xxs).semantics(mergeDescendants = true) { }, verticalAlignment = Alignment.CenterVertically) {
+                    Eyebrow(f.label, color = colors.inkMuted, modifier = Modifier.weight(1f))
+                    Text(f.value, style = Kaiju.type.numeralM, color = colors.ink)
+                    if (f.suffix.isNotEmpty()) {
+                        Spacer(Modifier.width(4.dp))
+                        Text(f.suffix.uppercase(), style = Kaiju.type.eyebrow, color = colors.inkMuted)
+                    }
+                }
+                if (i < facts.lastIndex) HairlineDivider(Modifier.fillMaxWidth())
+            }
+        }
+    } else {
+        Row(modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            facts.forEachIndexed { i, f ->
+                if (i > 0) Box(Modifier.width(1.dp).fillMaxHeight().background(colors.line))
+                Fact(f.label, f.value, f.suffix, Modifier.weight(if (i == 0) 1.2f else 1f).padding(start = if (i > 0) KaijuSpace.s else 0.dp))
+            }
         }
     }
 }
@@ -377,7 +414,7 @@ private fun FeaturedClassCard(state: TodayUiState, actions: TodayActions, modifi
 private fun Fact(label: String, value: String, suffix: String, modifier: Modifier = Modifier) {
     val colors = Kaiju.colors
     Column(modifier.semantics(mergeDescendants = true) { }) {
-        Eyebrow(label, color = colors.inkMuted)
+        FitText(label.uppercase(), style = Kaiju.type.eyebrow, color = colors.inkMuted)
         Row(verticalAlignment = Alignment.Bottom) {
             Text(value, style = Kaiju.type.numeralL, color = colors.ink, maxLines = 1)
             if (suffix.isNotEmpty()) {

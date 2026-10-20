@@ -343,45 +343,60 @@ fun AttendanceRow(
     note: String? = null,
 ) {
     val colors = Kaiju.colors
-    Row(
-        modifier
-            .fillMaxWidth()
-            .heightIn(min = 76.dp)
-            .padding(horizontal = KaijuSpace.gutter, vertical = KaijuSpace.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f).padding(end = KaijuSpace.s)) {
-            Text(name, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.height(3.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                BeltBar(belt, stripes, width = 40.dp, height = 10.dp)
-                if (note != null) {
-                    Spacer(Modifier.width(KaijuSpace.xs))
-                    Text(note, style = Kaiju.type.caption, color = colors.inkMuted, maxLines = 1)
-                }
+    val identity: @Composable () -> Unit = {
+        Text(name, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Spacer(Modifier.height(3.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BeltBar(belt, stripes, width = 40.dp, height = 10.dp)
+            if (note != null) {
+                Spacer(Modifier.width(KaijuSpace.xs))
+                Text(note, style = Kaiju.type.caption, color = colors.inkMuted, maxLines = 1)
             }
         }
+    }
+    val toggles: @Composable (Modifier) -> Unit = { toggleModifier ->
+        AttendanceToggle(
+            label = "Present",
+            icon = KaijuIcons.Check,
+            selected = status == AttendanceStatus.PRESENT,
+            selectedFill = colors.action,
+            selectedContent = colors.onAction,
+            onClick = { onMark(AttendanceStatus.PRESENT) },
+            modifier = toggleModifier,
+        )
+        Spacer(Modifier.width(KaijuSpace.xs))
+        AttendanceToggle(
+            label = "Absent",
+            icon = KaijuIcons.Close,
+            selected = status == AttendanceStatus.ABSENT,
+            selectedFill = colors.surfaceInset,
+            selectedContent = colors.signal,
+            selectedBorder = colors.signal,
+            onClick = { onMark(AttendanceStatus.ABSENT) },
+            modifier = toggleModifier,
+        )
+    }
+    if (isLargeFont()) {
+        // Large text: name on its own line, the two toggles share the full width below.
+        Column(modifier.fillMaxWidth().padding(horizontal = KaijuSpace.gutter, vertical = KaijuSpace.s)) {
+            identity()
+            Spacer(Modifier.height(KaijuSpace.xs))
+            Row(Modifier.fillMaxWidth().selectableGroup().semantics { contentDescription = "Attendance for $name" }) {
+                toggles(Modifier.weight(1f))
+            }
+        }
+    } else {
         Row(
-            Modifier.selectableGroup().semantics { contentDescription = "Attendance for $name" },
-            horizontalArrangement = Arrangement.spacedBy(KaijuSpace.xs),
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = 76.dp)
+                .padding(horizontal = KaijuSpace.gutter, vertical = KaijuSpace.xs),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            AttendanceToggle(
-                label = "Present",
-                icon = KaijuIcons.Check,
-                selected = status == AttendanceStatus.PRESENT,
-                selectedFill = colors.action,
-                selectedContent = colors.onAction,
-                onClick = { onMark(AttendanceStatus.PRESENT) },
-            )
-            AttendanceToggle(
-                label = "Absent",
-                icon = KaijuIcons.Close,
-                selected = status == AttendanceStatus.ABSENT,
-                selectedFill = colors.surfaceInset,
-                selectedContent = colors.signal,
-                selectedBorder = colors.signal,
-                onClick = { onMark(AttendanceStatus.ABSENT) },
-            )
+            Column(Modifier.weight(1f).padding(end = KaijuSpace.s)) { identity() }
+            Row(Modifier.selectableGroup().semantics { contentDescription = "Attendance for $name" }) {
+                toggles(Modifier)
+            }
         }
     }
 }
@@ -395,11 +410,12 @@ private fun AttendanceToggle(
     selectedContent: Color,
     onClick: () -> Unit,
     selectedBorder: Color? = null,
+    modifier: Modifier = Modifier,
 ) {
     val colors = Kaiju.colors
     val shape = KaijuShapes.Action
     Row(
-        Modifier
+        modifier
             .heightIn(min = 52.dp)
             .widthIn(min = 92.dp)
             .clip(shape)

@@ -1,6 +1,17 @@
 package com.earlthekaiju.coach.screenshots
 
 import android.app.Application
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
+import com.earlthekaiju.coach.R
+import com.earlthekaiju.coach.designsystem.component.KaijuNavRail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +94,7 @@ private const val PHONE = "w412dp-h915dp-xxhdpi"
 private const val PHONE_TALL = "w412dp-h1700dp-xxhdpi"
 private const val PHONE_LANDSCAPE = "w915dp-h412dp-land-xxhdpi"
 private const val SHEET = "w412dp-h2900dp-xxhdpi"
+private const val TABLET = "w900dp-h1280dp-xhdpi"
 
 /**
  * Renders every Sprint 01 screen from real Compose code with fixed fictional data.
@@ -94,17 +106,24 @@ private const val SHEET = "w412dp-h2900dp-xxhdpi"
 class ScreenshotTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun snap(name: String, fontScale: Float = 1f, content: @Composable () -> Unit) {
+    private fun snap(name: String, fontScale: Float = 1f, cropToContent: Boolean = false, content: @Composable () -> Unit) {
         compose.setContent {
             val d = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(d.density, fontScale)) {
                 KaijuTheme(reduceMotion = true) {
-                    Box(Modifier.fillMaxSize().background(Kaiju.colors.background)) { content() }
+                    Box(Modifier.fillMaxSize().background(Kaiju.colors.background)) {
+                        if (cropToContent) {
+                            Box(Modifier.fillMaxWidth().wrapContentHeight().testTag("content")) { content() }
+                        } else {
+                            content()
+                        }
+                    }
                 }
             }
         }
         compose.waitForIdle()
-        compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
+        val path = "build/outputs/roborazzi/$name.png"
+        if (cropToContent) compose.onNodeWithTag("content").captureRoboImage(path) else compose.onRoot().captureRoboImage(path)
     }
 
     /** Top-level screens are shown inside the real bottom navigation bar. */
@@ -348,8 +367,41 @@ class ScreenshotTest {
     }
 
     @Config(qualifiers = SHEET)
-    @Test fun s10_design_foundations() = snap("10-design-foundations") { FoundationsSheet() }
+    @Test fun s10_design_foundations() = snap("10-design-foundations", cropToContent = true) { FoundationsSheet() }
 
     @Config(qualifiers = SHEET)
-    @Test fun s11_design_components() = snap("11-design-components") { ComponentsSheet() }
+    @Test fun s11_design_components() = snap("11-design-components", cropToContent = true) { ComponentsSheet() }
+
+    @Test fun s02e_planner_font150() = snap("02e-planner-font-150", fontScale = 1.5f) {
+        Frame(TopLevel.PLANNER) {
+            PlannerScreen(
+                PlannerUiState(Fx.today, weekStartOf(Fx.today), Fx.today, weekSessions = weekSessions(), lessons = Fx.lessons, loading = false),
+                PlannerActions(),
+            )
+        }
+    }
+
+    @Test fun s06e_students_font200() = snap("06e-students-font-200", fontScale = 2f) {
+        Frame(TopLevel.STUDENTS) { StudentsScreen(StudentsUiState(loading = false, programs = Fx.programs, all = Fx.students), StudentsActions()) }
+    }
+
+    /** Tablet / wide window: the side rail replaces the bottom bar and content keeps a readable width. */
+    @Config(qualifiers = TABLET)
+    @Test fun s12_tablet_today() = snap("12-tablet-today") {
+        Row(Modifier.fillMaxSize()) {
+            KaijuNavRail(TopLevel.entries.map { it.item }, 0, {}, header = {
+                Image(painterResource(R.drawable.brand_eyes_mark), null, Modifier.size(width = 40.dp, height = 32.dp))
+            })
+            Box(Modifier.weight(1f)) {
+                TodayScreen(
+                    TodayUiState(
+                        loading = false, now = Fx.now, featured = Fx.nextClass,
+                        featuredObjective = Fx.lessonDraft.objective, featuredSegments = guardPreview,
+                        otherToday = listOf(Fx.kidsDone, Fx.openMat), todayCount = 3, lessonPlanCount = 3,
+                    ),
+                    TodayActions(),
+                )
+            }
+        }
+    }
 }

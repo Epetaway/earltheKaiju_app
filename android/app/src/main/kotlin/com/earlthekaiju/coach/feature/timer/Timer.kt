@@ -251,7 +251,7 @@ private fun PhaseField(state: TimerUiState, look: PhaseLook, field: Color, modif
             val text = Format.clock(s.remainingSeconds)
             val widthEm = text.count { it.isDigit() } * 0.52f + text.count { it == ':' } * 0.30f + 0.06f
             val density = LocalDensity.current
-            val byWidth = maxWidth / widthEm
+            val byWidth = maxWidth * 0.94f / widthEm
             val byHeight = maxHeight * 0.52f
             val sizeDp: Dp = minOf(byWidth, byHeight).coerceAtLeast(48.dp)
             val fontSize = with(density) { sizeDp.toSp() }
@@ -289,7 +289,8 @@ private fun PhaseField(state: TimerUiState, look: PhaseLook, field: Color, modif
                     next == null -> "Final round"
                     else -> "Next · ${next.phase.label} ${Format.clock(next.durationMillis / 1000)}"
                 }
-                Eyebrow(nextText, color = if (s.inWarning) colors.gold else if (field == colors.phaseWork) colors.ink else colors.inkMuted)
+                // Gold on Deep Emerald is only 3.8:1, so warning text stays Ivory; the gold border carries the cue.
+                Eyebrow(nextText, color = if (field == colors.phaseWork) colors.ink else if (s.inWarning) colors.gold else colors.inkMuted)
             }
         }
     }

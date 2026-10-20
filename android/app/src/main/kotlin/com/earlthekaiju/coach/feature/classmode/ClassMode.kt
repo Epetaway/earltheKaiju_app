@@ -54,6 +54,7 @@ import com.earlthekaiju.coach.designsystem.component.ButtonSize
 import com.earlthekaiju.coach.designsystem.component.ButtonVariant
 import com.earlthekaiju.coach.designsystem.component.ConfirmDialog
 import com.earlthekaiju.coach.designsystem.component.Eyebrow
+import com.earlthekaiju.coach.designsystem.component.FitText
 import com.earlthekaiju.coach.designsystem.component.HairlineDivider
 import com.earlthekaiju.coach.designsystem.component.KaijuButton
 import com.earlthekaiju.coach.designsystem.component.KaijuIconButton
@@ -243,10 +244,10 @@ fun ClassModeScreen(state: ClassModeUiState, actions: ClassModeActions) {
             if (wide) {
                 Row(Modifier.fillMaxSize().padding(horizontal = KaijuSpace.gutter)) {
                     Column(Modifier.weight(1.3f).fillMaxHeight().verticalScroll(rememberScrollState())) {
-                        SegmentHero(state, large = true)
+                        SegmentHero(state, landscape = true)
                     }
                     Spacer(Modifier.width(KaijuSpace.l))
-                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(top = KaijuSpace.m)) {
                         UpNext(state)
                         Spacer(Modifier.height(KaijuSpace.m))
                         state.timer?.let { MiniTimer(it, actions.onTimer) }
@@ -259,7 +260,7 @@ fun ClassModeScreen(state: ClassModeUiState, actions: ClassModeActions) {
                     Column(
                         Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = KaijuSpace.gutter),
                     ) {
-                        SegmentHero(state, large = false)
+                        SegmentHero(state, landscape = false)
                         Spacer(Modifier.height(KaijuSpace.l))
                         UpNext(state)
                         Spacer(Modifier.height(KaijuSpace.m))
@@ -304,7 +305,7 @@ private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFini
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LiveDot(size = 9.dp)
                 Spacer(Modifier.width(KaijuSpace.xs))
-                Eyebrow("Live · ${state.programName ?: "Class"}", color = colors.live)
+                Eyebrow("Live · Class mode", color = colors.live)
             }
             Text(state.title, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -322,30 +323,32 @@ private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFini
 }
 
 @Composable
-private fun SegmentHero(state: ClassModeUiState, large: Boolean) {
+private fun SegmentHero(state: ClassModeUiState, landscape: Boolean) {
     val colors = Kaiju.colors
     val seg = state.current ?: return
     val remaining = state.segmentRemainingMillis
     val over = remaining < 0
-    Column(Modifier.fillMaxWidth().padding(top = KaijuSpace.l)) {
+    Column(Modifier.fillMaxWidth().padding(top = if (landscape) KaijuSpace.s else KaijuSpace.l)) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(indexLabel(state.currentIndex + 1), style = Kaiju.type.displayL, color = colors.live)
+            Text(indexLabel(state.currentIndex + 1), style = if (landscape) Kaiju.type.displayM else Kaiju.type.displayL, color = colors.live)
             Text(
                 " / ${indexLabel(state.segments.size)}",
                 style = Kaiju.type.title,
                 color = colors.inkMuted,
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = if (landscape) 2.dp else 8.dp),
             )
             Spacer(Modifier.weight(1f))
-            Eyebrow(seg.kindLabel, color = colors.accent, modifier = Modifier.padding(bottom = 10.dp))
+            Eyebrow(seg.kindLabel, color = colors.accent, modifier = Modifier.padding(bottom = if (landscape) 4.dp else 10.dp))
         }
         Text(
             seg.title.uppercase(),
-            style = if (large) Kaiju.type.displayL else Kaiju.type.displayM,
+            style = Kaiju.type.displayM,
+            maxLines = if (landscape) 2 else 3,
+            overflow = TextOverflow.Ellipsis,
             color = colors.ink,
             modifier = Modifier.semantics { heading() },
         )
-        Spacer(Modifier.height(KaijuSpace.m))
+        Spacer(Modifier.height(if (landscape) KaijuSpace.xs else KaijuSpace.m))
         Row(
             verticalAlignment = Alignment.Bottom,
             modifier = Modifier.semantics(mergeDescendants = true) {
@@ -355,7 +358,7 @@ private fun SegmentHero(state: ClassModeUiState, large: Boolean) {
         ) {
             Text(
                 (if (over) "+" else "") + Format.clock(if (over) -remaining / 1000 else (remaining + 999) / 1000),
-                style = Kaiju.type.numeralHero.copy(fontSize = if (large) 140.sp else 104.sp, lineHeight = if (large) 140.sp else 104.sp),
+                style = Kaiju.type.numeralHero.copy(fontSize = if (landscape) 96.sp else 104.sp, lineHeight = if (landscape) 96.sp else 104.sp),
                 color = if (over) colors.gold else colors.ink,
             )
             Spacer(Modifier.width(KaijuSpace.s))
@@ -453,7 +456,7 @@ private fun QuickAction(label: String, value: String?, icon: androidx.compose.ui
                 Text(value, style = Kaiju.type.numeralM.copy(fontSize = 20.sp, lineHeight = 22.sp), color = colors.ink)
             }
         }
-        Text(label.uppercase(), style = Kaiju.type.eyebrow, color = colors.inkMuted)
+        FitText(label.uppercase(), style = Kaiju.type.eyebrow, color = colors.inkMuted, modifier = Modifier.padding(horizontal = 4.dp))
     }
 }
 

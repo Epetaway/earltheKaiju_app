@@ -135,10 +135,11 @@ fun StudentDetailScreen(state: StudentDetailUiState, onBack: () -> Unit, onEdit:
                         Box(Modifier.width(1.dp).fillMaxHeight().background(colors.line))
                         Stat("All time", state.presentTotal.toString(), "classes", Modifier.weight(1f).padding(start = KaijuSpace.s))
                         Box(Modifier.width(1.dp).fillMaxHeight().background(colors.line))
+                        val daysAgo = state.lastPresent?.let { java.time.temporal.ChronoUnit.DAYS.between(it, state.today) }
                         Stat(
                             "Last seen",
-                            state.lastPresent?.let { "${it.dayOfMonth}" } ?: "—",
-                            state.lastPresent?.let { Format.relativeDay(it, state.today) } ?: "never",
+                            when (daysAgo) { null -> "—"; 0L -> "Today"; else -> daysAgo.toString() },
+                            when (daysAgo) { null -> "no classes yet"; 0L -> "in class"; 1L -> "day ago"; else -> "days ago" },
                             Modifier.weight(1f).padding(start = KaijuSpace.s),
                         )
                     }

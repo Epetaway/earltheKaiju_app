@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Exact path data of the approved master crest (brand rule: never redraw or simplify). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="VectorPath"
     android:width="108.0dp"
     android:height="108.0dp"
     android:viewportWidth="108"
