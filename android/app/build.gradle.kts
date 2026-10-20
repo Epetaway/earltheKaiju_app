@@ -59,8 +59,6 @@ android {
         // Version-currency checks need network access to Google Maven; dependency
         // versions are verified by hand in docs/09-dependency-verification.md.
         disable += setOf("GradleDependency", "NewerVersionAvailable", "AndroidGradlePluginVersion", "OldTargetApi")
-        htmlReport = true
-        textReport = true
     }
 }
 
