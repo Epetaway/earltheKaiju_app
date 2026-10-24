@@ -55,6 +55,7 @@ import com.earlthekaiju.coach.designsystem.component.ButtonVariant
 import com.earlthekaiju.coach.designsystem.component.ConfirmDialog
 import com.earlthekaiju.coach.designsystem.component.Eyebrow
 import com.earlthekaiju.coach.designsystem.component.FitText
+import com.earlthekaiju.coach.designsystem.component.isLargeFont
 import com.earlthekaiju.coach.designsystem.component.HairlineDivider
 import com.earlthekaiju.coach.designsystem.component.KaijuButton
 import com.earlthekaiju.coach.designsystem.component.KaijuIconButton
@@ -296,6 +297,7 @@ fun ClassModeScreen(state: ClassModeUiState, actions: ClassModeActions) {
 private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFinish: () -> Unit) {
     val colors = Kaiju.colors
     val use24h = LocalUse24Hour.current
+    val large = isLargeFont()
     Row(
         Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(start = KaijuSpace.xxs, end = KaijuSpace.xs),
         verticalAlignment = Alignment.CenterVertically,
@@ -305,9 +307,9 @@ private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFini
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LiveDot(size = 9.dp)
                 Spacer(Modifier.width(KaijuSpace.xs))
-                Eyebrow("Live · Class mode", color = colors.live)
+                Eyebrow(if (large) "Live" else "Live · Class mode", color = colors.live)
             }
-            Text(state.title, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(state.title, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = if (large) 2 else 1, overflow = TextOverflow.Ellipsis)
         }
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = KaijuSpace.xs)) {
             Text(Format.time(state.wallTime, use24h), style = Kaiju.type.numeralM.copy(fontSize = 22.sp), color = colors.ink)

@@ -38,8 +38,9 @@ fun Eyebrow(
     modifier: Modifier = Modifier,
     color: Color = Kaiju.colors.gold,
     style: TextStyle = Kaiju.type.eyebrow,
+    maxLines: Int = 1,
 ) {
-    Text(text = text.uppercase(), style = style, color = color, modifier = modifier, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Text(text = text.uppercase(), style = style, color = color, modifier = modifier, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
 }
 
 /** Two-digit editorial index: 1 → "01". */
@@ -100,7 +101,8 @@ fun ScreenHeader(
         verticalAlignment = Alignment.Top,
     ) {
         Column(Modifier.weight(1f)) {
-            Eyebrow(eyebrow)
+            // Wraps rather than truncating when large text meets the trailing actions.
+            Eyebrow(eyebrow, maxLines = 2)
             Spacer(Modifier.height(KaijuSpace.xs))
             Text(
                 text = title.uppercase(),
