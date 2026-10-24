@@ -1,5 +1,8 @@
 package com.earlthekaiju.coach.feature.students
 
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -175,7 +178,7 @@ fun StudentDetailScreen(state: StudentDetailUiState, onBack: () -> Unit, onEdit:
                         }
                         HairlineDivider(Modifier.fillMaxWidth())
                     }
-                    Spacer(Modifier.height(KaijuSpace.xxl))
+                    Spacer(Modifier.windowInsetsPadding(WindowInsets.navigationBars).height(KaijuSpace.xxl))
                 }
             }
         }

@@ -1,5 +1,8 @@
 package com.earlthekaiju.coach.feature.settings
 
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -119,7 +122,7 @@ fun ProgramsScreen(programs: List<ProgramEntity>, onBack: () -> Unit, onSave: (P
                     Spacer(Modifier.height(KaijuSpace.l))
                     KaijuButton("Add program", { editing = ProgramDraft() }, Modifier.fillMaxWidth(), icon = KaijuIcons.Add)
                 }
-                Spacer(Modifier.height(KaijuSpace.xl))
+                Spacer(Modifier.windowInsetsPadding(WindowInsets.navigationBars).height(KaijuSpace.xl))
             }
         }
     }

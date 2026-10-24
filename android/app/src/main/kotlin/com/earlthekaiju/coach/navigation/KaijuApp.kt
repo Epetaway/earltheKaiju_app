@@ -1,5 +1,9 @@
 package com.earlthekaiju.coach.navigation
 
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import android.text.format.DateFormat
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -121,10 +125,15 @@ fun KaijuApp(container: AppContainer) {
                 Scaffold(
                     containerColor = Kaiju.colors.background,
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                    snackbarHost = { SnackbarHost(snackbar) { KaijuSnackbar(it) } },
+                    snackbarHost = {
+                        // Above the bottom bar when there is one; otherwise clear of the system
+                        // navigation bar (3-button navigation is 48dp) and the keyboard.
+                        val clearance = if (showNav && !wide) Modifier else Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                        SnackbarHost(snackbar, clearance) { KaijuSnackbar(it) }
+                    },
                     bottomBar = { if (showNav && !wide) KaijuBottomBar(items, selected, onSelect) },
                 ) { padding ->
-                    Row(Modifier.fillMaxSize().padding(padding)) {
+                    Row(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
                         if (showNav && wide) {
                             KaijuNavRail(items, selected, onSelect, header = {
                                 Image(painterResource(R.drawable.brand_eyes_mark), contentDescription = null, modifier = Modifier.size(width = 40.dp, height = 32.dp))

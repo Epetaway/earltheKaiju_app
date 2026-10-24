@@ -141,6 +141,9 @@ class DeviceFlowTest {
         compose.onNode(hasText("Finish class") and hasClickAction() and !hasAnyAncestor(isDialog())).performClick()
         compose.onNode(hasText("Finish class") and hasAnyAncestor(isDialog())).performClick()
         waitForText("COMPLETE", substring = true)
+        // Tap the field first, as a person would; the field must stay in view above the keyboard.
+        compose.onNode(hasContentDescription("Add a note") and hasSetTextAction()).scrollIfNeeded().performClick()
+        Thread.sleep(1_000)
         fill("Add a note", "Frames landed. Sparring ran long.")
         shot("d11-post-class")
         tap("Done")

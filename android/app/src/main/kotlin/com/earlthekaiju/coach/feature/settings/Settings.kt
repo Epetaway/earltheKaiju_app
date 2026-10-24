@@ -1,5 +1,8 @@
 package com.earlthekaiju.coach.feature.settings
 
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -215,7 +218,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                         modifier = Modifier.padding(top = KaijuSpace.xxs),
                     )
                 }
-                Spacer(Modifier.height(KaijuSpace.xxl))
+                Spacer(Modifier.windowInsetsPadding(WindowInsets.navigationBars).height(KaijuSpace.xxl))
             }
         }
     }

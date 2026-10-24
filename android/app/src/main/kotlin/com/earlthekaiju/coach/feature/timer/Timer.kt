@@ -1,5 +1,7 @@
 package com.earlthekaiju.coach.feature.timer
 
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -176,7 +178,7 @@ fun TimerScreen(state: TimerUiState, actions: TimerActions) {
     BoxWithConstraints(Modifier.fillMaxSize().background(colors.background)) {
         val wide = maxWidth > maxHeight && maxWidth >= 560.dp
         if (wide) {
-            Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
+            Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.navigationBars))) {
                 PhaseField(state, look, field, Modifier.weight(1.6f).fillMaxHeight())
                 Column(
                     Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(KaijuSpace.m),
@@ -188,7 +190,7 @@ fun TimerScreen(state: TimerUiState, actions: TimerActions) {
                 }
             }
         } else {
-            Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
+            Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.navigationBars))) {
                 TimerHeader(state, actions, Modifier.padding(horizontal = KaijuSpace.gutter))
                 PhaseField(state, look, field, Modifier.weight(1f).fillMaxWidth())
                 Column(Modifier.padding(horizontal = KaijuSpace.gutter, vertical = KaijuSpace.m), verticalArrangement = Arrangement.spacedBy(KaijuSpace.m)) {

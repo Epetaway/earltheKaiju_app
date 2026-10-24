@@ -1,5 +1,8 @@
 package com.earlthekaiju.coach.feature.planner
 
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -240,7 +243,7 @@ fun SessionDetailScreen(state: SessionDetailUiState, actions: SessionDetailActio
                             }
                         }
                     }
-                    Spacer(Modifier.height(KaijuSpace.xxl))
+                    Spacer(Modifier.windowInsetsPadding(WindowInsets.navigationBars).height(KaijuSpace.xxl))
                 }
             }
         }

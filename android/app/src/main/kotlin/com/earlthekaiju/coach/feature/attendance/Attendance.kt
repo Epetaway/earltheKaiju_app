@@ -1,5 +1,8 @@
 package com.earlthekaiju.coach.feature.attendance
 
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -194,7 +197,7 @@ fun AttendanceScreen(state: AttendanceUiState, actions: AttendanceActions) {
         }
         LazyColumn(
             Modifier.weight(1f),
-            contentPadding = PaddingValues(bottom = KaijuSpace.xl),
+            contentPadding = PaddingValues(bottom = KaijuSpace.xl + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item(key = "totals") {
