@@ -15,7 +15,7 @@ finding and its fix can both be checked against the same source.
 | Accessibility | Contrast (see design system table), 48 dp minimum targets, 64 dp hero actions, labels on every icon button, headings marked, rows merged for screen readers, state never shown by color alone, system "remove animations" respected | Code review + screenshots |
 | Responsive | Bottom bar under 600 dp, nav rail at 600 dp+, content capped at 640 dp, Class Mode and Timer re-laid out for landscape | Screens 04d, 05g, 12 |
 | Real-world use | Readable from across the mat, operable with one hand, nothing needs the network, screen stays on in Class Mode, no data loss on rotate, process death or accidental back | Tests + screens 04, 05 |
-| Engineering | Build, 65 unit/Robolectric tests, lint with warnings reviewed, Room schema exported, an end-to-end flow through the real activity | CI report on the `ci-reports` branch |
+| Engineering | Build, 66 unit/Robolectric tests, lint with warnings reviewed, Room schema exported, an end-to-end flow through the real activity | CI report on the `ci-reports` branch |
 
 ## Findings and fixes
 
@@ -32,11 +32,12 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 7 | Attendance rows cramped at 150% text. | Medium | Rows stack name above the Present / Absent pair at large text. | `659c138` |
 | 8 | Class Mode top bar truncated its eyebrow and class name at 150%. | Medium | Eyebrow shortens to "Live" and the title may wrap at large text. | `94d066e` |
 | 9 | No test exercised the app as a whole. | Medium | `AppFlowTest`: launches `MainActivity`, loads sample data, starts tonight's class, steps through every segment, finishes, runs the timer, opens a student. | `94d066e` |
-| 10 | Student detail "Last seen" showed a bare date. | Low | Shows "Today" or "N days ago". | `659c138` |
-| 11 | Empty Today offered the same action twice. | Low | "Plan ahead" only appears when there are classes. | `659c138` |
-| 12 | Screen eyebrows truncated beside header actions at 200%. | Low | Eyebrows wrap to two lines. | `94d066e` |
-| 13 | Lint: unused drawables; brand vectors over the path-length guideline. | Low | Unused drawables removed. Crest and launcher vectors keep their full geometry, marked `tools:ignore="VectorPath"` with a comment. | `659c138` |
-| 14 | `LiveDot` drew with the wrong size (a parameter shadowed the canvas size). | Build | Uses the canvas size explicitly. | `169cbca` |
+| 10 | Class Mode moved between segments with several separate database writes; two fast taps could interleave them. | Medium | One Room transaction per segment change; new test covers stepping back and out-of-range taps. | `9f94801` |
+| 11 | Student detail "Last seen" showed a bare date. | Low | Shows "Today" or "N days ago". | `659c138` |
+| 12 | Empty Today offered the same action twice. | Low | "Plan ahead" only appears when there are classes. | `659c138` |
+| 13 | Screen eyebrows truncated beside header actions at 200%. | Low | Eyebrows wrap to two lines. | `94d066e` |
+| 14 | Lint: unused drawables; brand vectors over the path-length guideline. | Low | Unused drawables removed. Crest and launcher vectors keep their full geometry, marked `tools:ignore="VectorPath"` with a comment. | `659c138` |
+| 15 | `LiveDot` drew with the wrong size (a parameter shadowed the canvas size). | Build | Uses the canvas size explicitly. | `169cbca` |
 
 ## Open watch items
 
@@ -61,6 +62,6 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 ## Verification at the end of the sprint
 
 - CI on `sprint/01-foundation`: assemble, tests and lint all pass.
-- Tests: timer engine (12), repositories against a real Room database (9), timer restore after
+- Tests: timer engine (12), repositories against a real Room database (10), timer restore after
   process death and reboot (3), rendered screens (40), end-to-end class flow (1).
-- Lint: no errors; remaining warnings reviewed (see #13).
+- Lint: no errors; remaining warnings reviewed (see #14).
