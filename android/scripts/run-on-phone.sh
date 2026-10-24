@@ -36,6 +36,25 @@ say "Phones connected"
 "$ADB" devices -l
 STATE="$("$ADB" get-state 2>&1 || true)"
 if [ "$STATE" != "device" ]; then
+  # A stale adb server is a common cause; restart it once before giving up.
+  "$ADB" kill-server > /dev/null 2>&1 || true
+  "$ADB" start-server > /dev/null 2>&1 || true
+  sleep 2
+  "$ADB" devices -l
+  STATE="$("$ADB" get-state 2>&1 || true)"
+fi
+if [ "$STATE" != "device" ]; then
+  say "Samsung devices on this Mac's USB bus (serial numbers left out)"
+  USB="$(system_profiler SPUSBHostDataType SPUSBDataType 2>/dev/null | grep -iE -B3 -A10 'samsung|0x04e8' | grep -viE 'serial')"
+  if [ -n "$USB" ]; then
+    echo "$USB"
+    echo
+    echo "The Mac sees the phone over USB, but adb can't use it yet: USB debugging is off,"
+    echo "or the 'Allow USB debugging?' prompt on the phone hasn't been accepted."
+  else
+    echo "None. The Mac doesn't see a Samsung phone over USB at all: try another cable"
+    echo "(some only charge) or another port, and unlock the phone."
+  fi
   echo
   echo "No authorized phone yet ($STATE). On the phone:"
   echo "  1. Settings > About phone > Software information > tap Build number 7 times"
