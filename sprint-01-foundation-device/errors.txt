@@ -1,0 +1,14 @@
+com.earlthekaiju.coach.device.DeviceFlowTest > buildScheduleAndTeachOnADevice[test(AVD) - 15] [31mFAILED [0m
+	com.google.android.apps.common.testing.accessibility.framework.integrations.espresso.AccessibilityViewCheckException: There were 3 accessibility results:
+Execute com.earlthekaiju.coach.device.DeviceFlowTest.buildScheduleAndTeachOnADevice: FAILED
+com.google.android.apps.common.testing.accessibility.framework.integrations.espresso.AccessibilityViewCheckException: com.google.android.apps.common.testing.accessibility.framework.integrations.espresso.AccessibilityViewCheckException: There were 3 accessibility results:
+Suppressed: java.util.concurrent.ExecutionException: An Exception occurred on the UI thread during runOnUiThread()
+com.google.android.apps.common.testing.accessibility.framework.integrations.espresso.AccessibilityViewCheckException: There were 3 accessibility results:
+Suppressed: java.util.concurrent.ExecutionException: An Exception occurred on the UI thread during runOnUiThread()
+> Task :app:connectedDebugAndroidTest FAILED
+* What went wrong:
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:connectedDebugAndroidTest' (registered by plugin 'com.android.internal.application').
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+Caused by: org.gradle.api.GradleException: There were failing tests. See the report at: file:///home/runner/work/earltheKaiju_app/earltheKaiju_app/android/app/build/reports/androidTests/connected/debug/index.html
+BUILD FAILED in 52s
