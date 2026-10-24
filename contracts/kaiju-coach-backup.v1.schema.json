@@ -1,0 +1,818 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Epetaway/earltheKaiju_app/contracts/kaiju-coach-backup.v1.schema.json",
+  "title": "Kaiju Coach backup / interchange file, format version 1",
+  "description": "Written by Settings › Export backup (Android, Room schema v1). One array per table, tombstones included. Also the record shape the desktop companion will read and write.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "kaiju-coach-backup"
+    },
+    "formatVersion": {
+      "const": 1
+    },
+    "databaseVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "exportedAt": {
+      "type": "integer",
+      "description": "Epoch milliseconds (UTC)"
+    },
+    "deviceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "app": {
+      "type": "string"
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/program"
+      }
+    },
+    "lessonPlans": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lessonPlan"
+      }
+    },
+    "lessonSegments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lessonSegment"
+      }
+    },
+    "techniques": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/technique"
+      }
+    },
+    "segmentTechniques": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/segmentTechnique"
+      }
+    },
+    "classSessions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/classSession"
+      }
+    },
+    "sessionSegments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sessionSegment"
+      }
+    },
+    "sessionNotes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sessionNote"
+      }
+    },
+    "students": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/student"
+      }
+    },
+    "enrollments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/enrollment"
+      }
+    },
+    "attendance": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attendance"
+      }
+    },
+    "timerPresets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/timerPreset"
+      }
+    }
+  },
+  "required": [
+    "format",
+    "formatVersion",
+    "databaseVersion",
+    "exportedAt",
+    "deviceId",
+    "programs",
+    "lessonPlans",
+    "lessonSegments",
+    "techniques",
+    "segmentTechniques",
+    "classSessions",
+    "sessionSegments",
+    "sessionNotes",
+    "students",
+    "enrollments",
+    "attendance",
+    "timerPresets"
+  ],
+  "$defs": {
+    "program": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "ADULTS",
+            "KIDS",
+            "TEENS",
+            "ALL_AGES",
+            "PRIVATE"
+          ]
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "EMERALD",
+            "GOLD",
+            "IVORY",
+            "ACCENT"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "sortOrder": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "audience",
+        "color",
+        "notes",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "lessonPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "programId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "targetMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "objective": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "isTemplate": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "programId",
+        "targetMinutes",
+        "objective",
+        "notes",
+        "isTemplate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "lessonSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "lessonPlanId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "position": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "title": {
+          "type": "string"
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "WARM_UP",
+            "INSTRUCTION",
+            "DRILLING",
+            "POSITIONAL",
+            "SPARRING",
+            "REVIEW",
+            "OTHER"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        }
+      },
+      "required": [
+        "id",
+        "lessonPlanId",
+        "position",
+        "title",
+        "minutes",
+        "kind",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "technique": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "segmentTechnique": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "segmentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "techniqueId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "position": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segmentId",
+        "techniqueId",
+        "position"
+      ]
+    },
+    "classSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "programId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "lessonPlanId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Local wall-clock date, ISO-8601"
+        },
+        "startTime": {
+          "type": "string",
+          "pattern": "^\\d{2}:\\d{2}(:\\d{2})?$",
+          "description": "Local wall-clock time"
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "location": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SCHEDULED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "CANCELED"
+          ]
+        },
+        "startedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        },
+        "endedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        },
+        "currentSegmentIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currentSegmentStartedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "programId",
+        "lessonPlanId",
+        "date",
+        "startTime",
+        "durationMinutes",
+        "location",
+        "status",
+        "startedAt",
+        "endedAt",
+        "currentSegmentIndex",
+        "currentSegmentStartedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "sessionSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "position": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "minutes": {
+          "type": "integer"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "WARM_UP",
+            "INSTRUCTION",
+            "DRILLING",
+            "POSITIONAL",
+            "SPARRING",
+            "REVIEW",
+            "OTHER"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "techniqueNames": {
+          "type": "string",
+          "description": "Snapshot: one technique name per line"
+        },
+        "startedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        },
+        "endedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        }
+      },
+      "required": [
+        "id",
+        "sessionId",
+        "position",
+        "title",
+        "minutes",
+        "kind",
+        "notes",
+        "techniqueNames",
+        "startedAt",
+        "endedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "sessionNote": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "body": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "sessionId",
+        "body",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "student": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "belt": {
+          "type": "string",
+          "enum": [
+            "WHITE",
+            "GREY_WHITE",
+            "GREY",
+            "GREY_BLACK",
+            "YELLOW_WHITE",
+            "YELLOW",
+            "YELLOW_BLACK",
+            "ORANGE_WHITE",
+            "ORANGE",
+            "ORANGE_BLACK",
+            "GREEN_WHITE",
+            "GREEN",
+            "GREEN_BLACK",
+            "BLUE",
+            "PURPLE",
+            "BROWN",
+            "BLACK"
+          ]
+        },
+        "stripes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "isMinor": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "ARCHIVED"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "belt",
+        "stripes",
+        "isMinor",
+        "status",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "enrollment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "studentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "programId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        }
+      },
+      "required": [
+        "studentId",
+        "programId",
+        "createdAt"
+      ]
+    },
+    "attendance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "studentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PRESENT",
+            "ABSENT"
+          ]
+        },
+        "markedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "sessionId",
+        "studentId",
+        "status",
+        "markedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "timerPreset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "prepSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "workSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "restSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rounds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warningSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sortOrder": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "description": "Epoch milliseconds (UTC)"
+        },
+        "deletedAt": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Epoch milliseconds (UTC); null = not deleted"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "prepSeconds",
+        "workSeconds",
+        "restSeconds",
+        "rounds",
+        "warningSeconds",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  }
+}
