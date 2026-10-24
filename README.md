@@ -15,6 +15,7 @@ attendance and my roster. It works with no internet connection, and student data
 | ![Today](docs/screenshots/sprint-01/01-today.png) | ![Class Mode](docs/screenshots/sprint-01/04-class-mode.png) | ![Timer](docs/screenshots/sprint-01/05-timer-work.png) | ![Attendance](docs/screenshots/sprint-01/07-attendance.png) |
 
 Every screenshot is rendered from the real Compose code by CI (Roborazzi), with fictional data.
+All 45 screen states are in [`docs/screenshots/sprint-01`](docs/screenshots/sprint-01/README.md).
 
 ## Repository layout
 
