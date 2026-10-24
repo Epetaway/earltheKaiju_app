@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -223,8 +224,15 @@ fun KaijuBottomSheet(
         containerColor = colors.surface,
         contentColor = colors.ink,
         scrimColor = colors.scrim,
+        // The gold bar sits in a labeled 64×48dp target: the sheet wraps it with expand/dismiss
+        // actions for screen readers, and the device accessibility checks require a label and size.
         dragHandle = {
-            Box(Modifier.padding(top = KaijuSpace.s, bottom = KaijuSpace.xs).size(width = 36.dp, height = 3.dp).background(colors.gold))
+            Box(
+                Modifier.size(width = 64.dp, height = 48.dp).semantics { contentDescription = "Drag handle" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(Modifier.size(width = 36.dp, height = 3.dp).background(colors.gold))
+            }
         },
     ) {
         Column(
