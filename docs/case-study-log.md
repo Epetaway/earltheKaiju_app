@@ -38,6 +38,25 @@ after reboot, ~40 rendered screen states including font scale 150%/200% and land
 **Not yet proven.** Use during a real class. Locked-screen timer cues (deliberately deferred).
 Sync (designed, not built).
 
+## 2026-10-20 → 10-24 · Design and engineering QA
+
+**Method.** Reviewed every CI-rendered screen at phone, landscape, tablet and 150%/200% text, as
+a designer and as an engineer in the same pass. Full table in `08-qa-review.md`.
+
+**What the review caught.** The most important action on the most important screen ("Start
+class" on Today) was below the fold. Buttons truncated their labels. Landscape Class Mode clipped
+its own countdown. One color pair (gold on deep emerald) fell under 4.5:1. Large text broke the
+nav bar, the class facts and attendance rows.
+
+**What changed.** Start class moved up under the facts. Labels wrap; paired buttons stack at large
+text; single-line labels auto-size. Landscape gets its own hero scale. The failing pair became
+Ivory. An end-to-end test now drives the real activity from empty app to finished class.
+
+**Takeaway for the case study.** Rendering every state in CI made the review concrete: each
+fix was confirmed by re-rendering the same state from the same code. For the case study, keep
+future before/after pairs by saving the screenshot folder before each QA pass (the CI report
+branch only holds the latest run).
+
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.
