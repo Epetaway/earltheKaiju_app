@@ -319,7 +319,8 @@ private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFini
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = KaijuSpace.xs)) {
             Text(Format.time(state.wallTime, use24h), style = Kaiju.type.numeralM.copy(fontSize = 22.sp), color = colors.ink)
             Text(
-                "CLASS ${Format.clock(state.classElapsedMillis / 1000)}",
+                // Large text: drop the wide-tracked "CLASS" label so the class name keeps its room.
+                (if (large) "" else "CLASS ") + Format.clock(state.classElapsedMillis / 1000),
                 style = Kaiju.type.eyebrow,
                 color = colors.inkMuted,
                 modifier = Modifier.semantics { contentDescription = "Class running for ${state.classElapsedMillis / 60_000} minutes" },

@@ -414,8 +414,8 @@ private fun AttendanceToggle(
     selectedFill: Color,
     selectedContent: Color,
     onClick: () -> Unit,
-    selectedBorder: Color? = null,
     modifier: Modifier = Modifier,
+    selectedBorder: Color? = null,
 ) {
     val colors = Kaiju.colors
     val shape = KaijuShapes.Action
