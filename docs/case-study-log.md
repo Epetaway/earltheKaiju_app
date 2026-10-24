@@ -65,6 +65,30 @@ fix was confirmed by re-rendering the same state from the same code. For the cas
 future before/after pairs by saving the screenshot folder before each QA pass (the CI report
 branch only holds the latest run).
 
+## 2026-10-24 · Full slice and a real Android system
+
+**Why.** The full kickoff brief asked for the whole vertical slice to be tested through the UI
+and for visual checks on an emulator. Until then every screen had been rendered under
+Robolectric only. Robolectric has no real window, system bars, keyboard or accessibility service.
+
+**What was added.** One test drives the slice from an empty app through the real screens:
+program → student → lesson (rename, add, reorder) → schedule → start → timer → attendance with
+undo → finish with a note → restart. CI runs it twice: under Robolectric for speed, and on an
+Android 15 Pixel 7 emulator with Google's Accessibility Test Framework checking every tap. The
+emulator run takes full-screen screenshots, rotation and keyboard included.
+
+**What the emulator caught that the renders couldn't.**
+- The bottom-sheet drag handle was unlabeled and too small. The accessibility checks failed the
+  run on it.
+- With the keyboard open, a focused field and the Save bar were hidden behind it.
+- In landscape, real status and navigation bars pushed Class Mode's quick actions off screen.
+
+All three are fixed. Separately, the consistency review found that the class editor dropped
+unsaved changes without asking, unlike the other editors.
+
+**Takeaway.** Fast renders are good for breadth: every state at every text size. A real system
+is good for depth: insets, input methods and accessibility services. Both now run on every push.
+
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.

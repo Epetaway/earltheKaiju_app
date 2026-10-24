@@ -45,6 +45,11 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 17 | Bottom-sheet drag handle had no label and was under 48 dp. It carries expand and dismiss actions for screen readers. Found by the device run's accessibility checks. | Medium | The gold bar sits in a labeled 64×48 dp target. | `a0a2830` |
 | 18 | The class editor discarded unsaved changes silently, while the lesson and student editors asked first. | Low | Same "Discard changes?" confirmation on back. | `a09cbf0` |
 | 19 | The core flow was only tested in pieces through the UI. | Medium | `AppFlowTest.buildScheduleAndTeachFromAnEmptyApp` and `DeviceFlowTest` drive Today → program → student → lesson → schedule → start → timer → attendance (with undo) → finish → restart from an empty app. | `f9316bf` |
+| 20 | With the keyboard open, editors' bottom action bars hid behind it and a focused field near the bottom (student note) stayed covered. Seen only on the device run. | High | `imePadding` on the whole screen: the scroll area shrinks and keeps the focused field visible; the action bar sits above the keyboard. | `29fb1e2` |
+| 21 | Class Mode landscape on a real phone: with status and navigation bars, the quick actions (attendance, timer, note) fell below the fold. | High | Controls and the mini timer are pinned to the bottom of the right column; only Up Next scrolls. | `29fb1e2` |
+| 22 | No side insets: in landscape, 3-button navigation or a camera cutout could cover content. | Medium | Horizontal safe-drawing insets are applied app-wide. | `29fb1e2` |
+| 23 | Closing a lesson segment sheet brought the keyboard back over the builder. | Low | Opening a segment sheet clears form focus first. | `29fb1e2` |
+| 24 | The emulator's own "Pixel Launcher isn't responding" dialog covered the first device screenshots. It was a CI environment issue, not an app issue. | CI | Error dialogs are hidden on the emulator before the run. | `7cb66b2` |
 
 ## Open watch items
 
@@ -52,8 +57,9 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 
 - **Nav labels at 200% text** fit by shrinking one at a time, so "Today" renders larger than
   "Students". Readable, but uneven. A shared size across the bar would look calmer.
-- **Class Mode landscape** shows the segment's coaching cue just below the fold on a 412 dp-tall
-  phone; it scrolls. Moving the cue into the right column in landscape would remove the scroll.
+- **Class Mode landscape** keeps the controls in view (see #21), but the segment's coaching cue
+  sits below the countdown and needs a scroll on a phone. Moving the cue into the right column
+  would remove the scroll.
 - **Long class names in Class Mode at 150%+ text** shrink to fit and then end in an ellipsis.
   The full name is on the screen you came from; keep class titles short.
 - **Locked-screen timer cues** are not built. The timer keeps correct time and catches up on
