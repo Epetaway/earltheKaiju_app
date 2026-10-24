@@ -30,14 +30,14 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 5 | At 200% text, nav labels and the class facts truncated. | Medium | Single-line labels auto-size (`FitText`); the facts row becomes stacked rows (`FactRow`). | `659c138` |
 | 6 | Class Mode quick-action labels broke mid-word. | Medium | Auto-sized single-line labels. | `659c138` |
 | 7 | Attendance rows cramped at 150% text. | Medium | Rows stack name above the Present / Absent pair at large text. | `659c138` |
-| 8 | Class Mode top bar truncated its eyebrow and class name at 150%. | Medium | Eyebrow shortens to "Live"; the class name shrinks to fit one line instead of breaking mid-word. | `94d066e`, next commit |
+| 8 | Class Mode top bar truncated its eyebrow and class name at 150%. | Medium | Eyebrow shortens to "Live"; the elapsed caption drops its label; the class name shrinks to fit one line instead of breaking mid-word. | `94d066e`, `312f025`, `a2139e0` |
 | 9 | No test exercised the app as a whole. | Medium | `AppFlowTest`: launches `MainActivity`, loads sample data, starts tonight's class, steps through every segment, finishes, runs the timer, opens a student. | `94d066e` |
 | 10 | Class Mode moved between segments with several separate database writes; two fast taps could interleave them. | Medium | One Room transaction per segment change; new test covers stepping back and out-of-range taps. | `9f94801` |
 | 11 | Student detail "Last seen" showed a bare date. | Low | Shows "Today" or "N days ago". | `659c138` |
 | 12 | Empty Today offered the same action twice. | Low | "Plan ahead" only appears when there are classes. | `659c138` |
 | 13 | Screen eyebrows truncated beside header actions at 200%. | Low | Eyebrows wrap to two lines. | `94d066e` |
-| 14 | Finished segments were struck through, so the post-class "Taught" list read like a list of cancelled items. | Low | Finished segments show a muted title with a check; strikethrough is reserved for cancelled classes. | next commit |
-| 15 | Lint: unused drawables; brand vectors over the path-length guideline. | Low | Unused drawables removed. Crest and launcher vectors keep their full geometry, marked `tools:ignore="VectorPath"` with a comment. | `659c138` |
+| 14 | Finished segments were struck through, so the post-class "Taught" list read like a list of cancelled items. | Low | Finished segments show a muted title with a check; strikethrough is reserved for cancelled classes. | `312f025` |
+| 15 | Lint: unused drawables; brand vectors over the path-length guideline; one modifier-order warning. | Low | Unused drawables removed. Crest and launcher vectors keep their full geometry, marked `tools:ignore="VectorPath"` with a comment. Modifier order fixed. | `659c138`, `a2139e0` |
 | 16 | `LiveDot` drew with the wrong size (a parameter shadowed the canvas size). | Build | Uses the canvas size explicitly. | `169cbca` |
 
 ## Open watch items
@@ -48,6 +48,8 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
   "Students". Readable, but uneven. A shared size across the bar would look calmer.
 - **Class Mode landscape** shows the segment's coaching cue just below the fold on a 412 dp-tall
   phone; it scrolls. Moving the cue into the right column in landscape would remove the scroll.
+- **Long class names in Class Mode at 150%+ text** shrink to fit and then end in an ellipsis.
+  The full name is on the screen you came from; keep class titles short.
 - **Locked-screen timer cues** are not built. The timer keeps correct time and catches up on
   return, but it does not sound while the phone is locked. Plan and limits in
   [07-timer-platform-behavior.md](07-timer-platform-behavior.md).
