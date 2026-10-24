@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.earlthekaiju.coach.designsystem.theme.KaijuSpace
@@ -41,6 +42,7 @@ fun FitText(
         style = style.merge(TextStyle(color = color, textAlign = textAlign)),
         maxLines = 1,
         softWrap = false,
+        overflow = TextOverflow.Ellipsis, // only if it still doesn't fit at minSize
         autoSize = TextAutoSize.StepBased(minFontSize = minSize, maxFontSize = style.fontSize, stepSize = 0.5.sp),
     )
 }

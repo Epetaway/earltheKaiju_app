@@ -195,14 +195,19 @@ fun LessonSegmentRow(
         )
         Column(Modifier.weight(1f).padding(top = if (compact) 1.dp else 3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Done reads as "checked off", not crossed out: muted title plus a check, no strikethrough.
                 Text(
                     title,
-                    style = Kaiju.type.titleSmall.copy(textDecoration = if (state == SegmentState.Done) TextDecoration.LineThrough else null),
+                    style = Kaiju.type.titleSmall,
                     color = if (state == SegmentState.Done) colors.inkMuted else colors.ink,
                     modifier = Modifier.weight(1f, fill = false),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (state == SegmentState.Done) {
+                    Spacer(Modifier.width(KaijuSpace.xs))
+                    Icon(KaijuIcons.Check, contentDescription = null, tint = colors.accent, modifier = Modifier.size(16.dp))
+                }
                 Spacer(Modifier.width(KaijuSpace.xs))
                 Text("$minutes MIN", style = Kaiju.type.eyebrow, color = colors.inkMuted, maxLines = 1)
             }

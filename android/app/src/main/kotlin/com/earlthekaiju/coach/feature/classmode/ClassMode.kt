@@ -309,7 +309,12 @@ private fun ClassModeTopBar(state: ClassModeUiState, onLeave: () -> Unit, onFini
                 Spacer(Modifier.width(KaijuSpace.xs))
                 Eyebrow(if (large) "Live" else "Live · Class mode", color = colors.live)
             }
-            Text(state.title, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = if (large) 2 else 1, overflow = TextOverflow.Ellipsis)
+            // Large text: shrink the name to one line rather than breaking a word across two.
+            if (large) {
+                FitText(state.title, style = Kaiju.type.titleSmall, color = colors.ink, minSize = 14.sp)
+            } else {
+                Text(state.title, style = Kaiju.type.titleSmall, color = colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
         }
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = KaijuSpace.xs)) {
             Text(Format.time(state.wallTime, use24h), style = Kaiju.type.numeralM.copy(fontSize = 22.sp), color = colors.ink)
