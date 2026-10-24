@@ -6,6 +6,48 @@ labeled, no functionality · **Planned** = documented only.
 Screenshots for every screen are rendered from the real Compose code by CI
 (`docs/screenshots/sprint-01/`). File names are given in each section.
 
+## Core user flows
+
+The three paths the app is built around. Each one is driven end to end by an automated test
+through the real UI. Flows A and B run under Robolectric (`AppFlowTest`) and on an Android
+emulator (`DeviceFlowTest`).
+
+**A · First class from an empty app.** This is the Sprint 01 vertical slice.
+
+```mermaid
+flowchart LR
+  T0[Today: nothing scheduled] --> P[Settings › Programs: add program]
+  P --> S[Students: add student, enroll]
+  S --> L[Today › Build a lesson plan: title, segments, reorder]
+  L --> E[Save and assign › Schedule class: program, time]
+  E --> T1[Today: next class, Start class]
+  T1 --> C[Class Mode]
+```
+
+**B · A class night.** This is the path that has to work while standing on the mat.
+
+```mermaid
+flowchart LR
+  T[Today] -->|Start class| C[Class Mode: segment, countdown, up next]
+  C -->|Timer| R[Round timer] -->|Back to class| C
+  C -->|Attendance| A[Mark present / absent, Undo] -->|Back| C
+  C -->|Next segment ×n| C
+  C -->|Finish class| F[Post-class: totals, note] -->|Done| T
+```
+
+**C · Weekly planning.** Done at home or on the computer before the week starts.
+
+```mermaid
+flowchart LR
+  PL[Planner: week strip] --> D[Day agenda] -->|Add| E[Schedule class]
+  PL -->|Lessons| LL[Lesson library] --> LB[Lesson builder] -->|Save and assign| E
+  D --> SD[Class detail] -->|Edit / Cancel| E
+```
+
+Rule for every flow: back always returns to where you came from. Leaving Class Mode never
+ends the class (the class keeps running and Today shows *Resume class*). The class, lesson
+and student editors ask before discarding unsaved changes.
+
 ---
 
 ## 01 · Today — Built

@@ -1,5 +1,6 @@
 package com.earlthekaiju.coach.feature.planner
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -74,7 +75,10 @@ data class SessionEditorUiState(
     val lessons: List<LessonPlanSummary> = emptyList(),
     /** Set after a successful save/delete so the screen can leave. */
     val done: Boolean = false,
+    /** The draft as loaded; leaving with a different draft asks first. */
+    val original: SessionDraft? = null,
 ) {
+    val dirty: Boolean get() = original != null && draft != original
     val programName: String? get() = programs.firstOrNull { it.id == draft.programId }?.name
     val lessonTitle: String? get() = lessons.firstOrNull { it.plan.id == draft.lessonPlanId }?.plan?.title
     val titlePlaceholder: String get() = lessonTitle ?: programName ?: "e.g. Fundamentals"
@@ -98,28 +102,22 @@ class SessionEditorViewModel(private val c: AppContainer, handle: SavedStateHand
             if (id != null) {
                 val s = c.sessions.get(id)
                 if (s != null) {
-                    form.value = form.value.copy(
-                        loading = false,
-                        isNew = false,
-                        status = s.status,
-                        draft = SessionDraft(
-                            id = s.id, title = s.title, programId = s.programId, lessonPlanId = s.lessonPlanId,
-                            date = s.date, startTime = s.startTime, durationMinutes = s.durationMinutes, location = s.location,
-                        ),
+                    val loaded = SessionDraft(
+                        id = s.id, title = s.title, programId = s.programId, lessonPlanId = s.lessonPlanId,
+                        date = s.date, startTime = s.startTime, durationMinutes = s.durationMinutes, location = s.location,
                     )
+                    form.value = form.value.copy(loading = false, isNew = false, status = s.status, draft = loaded, original = loaded)
                     return@launch
                 }
             }
             // New class from a lesson plan: borrow its program and length.
             val planId = route.lessonPlanId
             val plan = planId?.let { pid -> c.lessons.observeTemplates().first().firstOrNull { it.plan.id == pid } }
-            form.value = form.value.copy(
-                loading = false,
-                draft = form.value.draft.copy(
-                    programId = plan?.plan?.programId,
-                    durationMinutes = plan?.plan?.targetMinutes ?: 60,
-                ),
+            val initial = form.value.draft.copy(
+                programId = plan?.plan?.programId,
+                durationMinutes = plan?.plan?.targetMinutes ?: 60,
             )
+            form.value = form.value.copy(loading = false, draft = initial, original = initial)
         }
     }
 
@@ -185,7 +183,7 @@ fun SessionEditorDestination(onDone: () -> Unit, onManagePrograms: () -> Unit) {
     )
 }
 
-private enum class EditorDialog { None, Date, Time, Program, Lesson, Delete, Cancel }
+private enum class EditorDialog { None, Date, Time, Program, Lesson, Delete, Cancel, Discard }
 
 @Composable
 fun SessionEditorScreen(state: SessionEditorUiState, actions: SessionEditorActions) {
@@ -193,11 +191,14 @@ fun SessionEditorScreen(state: SessionEditorUiState, actions: SessionEditorActio
     val use24h = LocalUse24Hour.current
     var dialog by remember { mutableStateOf(EditorDialog.None) }
     val d = state.draft
+    // Same rule as the lesson and student editors: unsaved changes are never lost silently.
+    val back = { if (state.dirty) dialog = EditorDialog.Discard else actions.onBack() }
+    BackHandler(enabled = state.dirty) { dialog = EditorDialog.Discard }
     Column(Modifier.fillMaxSize().background(colors.background)) {
         KaijuTopBar(
             title = if (state.isNew) "Schedule class" else "Edit class",
             eyebrow = Format.dayEyebrow(d.date),
-            onBack = actions.onBack,
+            onBack = back,
             backDescription = "Close without saving",
         )
         if (state.loading) {
@@ -316,6 +317,15 @@ fun SessionEditorScreen(state: SessionEditorUiState, actions: SessionEditorActio
             body = "The class, its attendance and its notes are removed from the planner. This can't be undone.",
             confirmLabel = "Delete",
             onConfirm = { dialog = EditorDialog.None; actions.onDelete() },
+            onDismiss = { dialog = EditorDialog.None },
+            destructive = true,
+        )
+        EditorDialog.Discard -> ConfirmDialog(
+            title = "Discard changes?",
+            body = if (state.isNew) "This class won't be scheduled." else "Your edits to this class won't be saved.",
+            confirmLabel = "Discard",
+            dismissLabel = "Keep editing",
+            onConfirm = { dialog = EditorDialog.None; actions.onBack() },
             onDismiss = { dialog = EditorDialog.None },
             destructive = true,
         )
