@@ -71,6 +71,9 @@ class DeviceFlowTest {
         compose.onAllNodes((hasContentDescription("Add student") or hasText("Add student")) and hasClickAction()).onFirst().performClick()
         fill("First name", "Sam")
         fill("Last name", "Rivera")
+        // Tap the note field near the bottom: the keyboard opens and the form must lift above it.
+        compose.onNode(hasContentDescription("Note") and hasSetTextAction()).scrollIfNeeded().performClick()
+        Thread.sleep(1_200)
         shot("d03-student-editor-keyboard")
         tap("Adult Fundamentals")
         tap("Save")

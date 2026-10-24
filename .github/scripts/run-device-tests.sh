@@ -9,6 +9,11 @@ adb shell rm -rf /data/local/tmp/kaiju
 adb shell mkdir -p /data/local/tmp/kaiju
 # Show the on-screen keyboard even though the emulator reports a hardware keyboard.
 adb shell settings put secure show_ime_with_hard_keyboard 1 || true
+# CI emulators often raise "Pixel Launcher isn't responding" after a cold boot; that system
+# dialog has nothing to do with the app but covers every screenshot. Hide error dialogs and
+# close any already showing.
+adb shell settings put global hide_error_dialogs 1 || true
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS > /dev/null 2>&1 || true
 adb logcat -c || true
 {
   echo "Android $(adb shell getprop ro.build.version.release | tr -d '\r') (API $(adb shell getprop ro.build.version.sdk | tr -d '\r'))"
