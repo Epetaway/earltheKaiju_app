@@ -194,7 +194,9 @@ fun SessionEditorScreen(state: SessionEditorUiState, actions: SessionEditorActio
     // Same rule as the lesson and student editors: unsaved changes are never lost silently.
     val back = { if (state.dirty) dialog = EditorDialog.Discard else actions.onBack() }
     BackHandler(enabled = state.dirty) { dialog = EditorDialog.Discard }
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    // imePadding on the whole screen: with the keyboard up the scroll area shrinks (keeping the
+    // focused field in view) and the bottom action bar sits right above the keyboard.
+    Column(Modifier.fillMaxSize().background(colors.background).imePadding()) {
         KaijuTopBar(
             title = if (state.isNew) "Schedule class" else "Edit class",
             eyebrow = Format.dayEyebrow(d.date),
@@ -209,7 +211,6 @@ fun SessionEditorScreen(state: SessionEditorUiState, actions: SessionEditorActio
             Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .imePadding()
                 .padding(horizontal = KaijuSpace.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

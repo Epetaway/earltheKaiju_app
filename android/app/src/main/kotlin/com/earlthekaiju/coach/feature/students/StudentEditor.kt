@@ -156,7 +156,9 @@ fun StudentEditorScreen(state: StudentEditorUiState, actions: StudentEditorActio
     var dialog by remember { mutableStateOf(StudentDialog.None) }
     val d = state.draft
     BackHandler(enabled = state.dirty) { dialog = StudentDialog.Discard }
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    // imePadding on the whole screen: with the keyboard up the scroll area shrinks (keeping the
+    // focused field in view) and the bottom action bar sits right above the keyboard.
+    Column(Modifier.fillMaxSize().background(colors.background).imePadding()) {
         KaijuTopBar(
             title = if (state.isNew) "Add student" else "${d.firstName} ${d.lastName}".trim().ifEmpty { "Student" },
             eyebrow = "Roster",
@@ -168,7 +170,7 @@ fun StudentEditorScreen(state: StudentEditorUiState, actions: StudentEditorActio
             return@Column
         }
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).imePadding().padding(horizontal = KaijuSpace.gutter),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = KaijuSpace.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.readableWidth()) {

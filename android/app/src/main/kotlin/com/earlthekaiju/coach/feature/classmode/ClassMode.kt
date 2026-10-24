@@ -248,11 +248,18 @@ fun ClassModeScreen(state: ClassModeUiState, actions: ClassModeActions) {
                         SegmentHero(state, landscape = true)
                     }
                     Spacer(Modifier.width(KaijuSpace.l))
-                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(top = KaijuSpace.m)) {
-                        UpNext(state)
-                        Spacer(Modifier.height(KaijuSpace.m))
-                        state.timer?.let { MiniTimer(it, actions.onTimer) }
-                        Spacer(Modifier.height(KaijuSpace.m))
+                    // Controls stay pinned at the bottom of the right column; only Up Next scrolls.
+                    // On a real landscape phone the status and navigation bars leave ~260dp, and the
+                    // controls must never fall below the fold.
+                    Column(Modifier.weight(1f).fillMaxHeight()) {
+                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = KaijuSpace.m)) {
+                            UpNext(state)
+                        }
+                        Spacer(Modifier.height(KaijuSpace.s))
+                        state.timer?.let {
+                            MiniTimer(it, actions.onTimer)
+                            Spacer(Modifier.height(KaijuSpace.s))
+                        }
                         ClassControls(state, actions, onFinish = { confirmFinish = true }, onNote = { noteSheet = true })
                     }
                 }

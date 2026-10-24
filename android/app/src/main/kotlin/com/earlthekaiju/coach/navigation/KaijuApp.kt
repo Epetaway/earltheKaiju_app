@@ -10,6 +10,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -104,7 +109,14 @@ fun KaijuApp(container: AppContainer) {
             val showNav = destination != null && TopLevel.entries.any { it.isTopOf(destination) }
             val items = TopLevel.entries.map { it.item }
             val onSelect: (Int) -> Unit = { navController.navigateToTab(TopLevel.entries[it]) }
-            BoxWithConstraints(Modifier.fillMaxSize()) {
+            // Side insets (3-button navigation and camera cutouts in landscape) apply app-wide;
+            // top and bottom insets are handled by the bars and screens themselves.
+            BoxWithConstraints(
+                Modifier
+                    .fillMaxSize()
+                    .background(Kaiju.colors.background)
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
+            ) {
                 val wide = maxWidth >= 600.dp
                 Scaffold(
                     containerColor = Kaiju.colors.background,

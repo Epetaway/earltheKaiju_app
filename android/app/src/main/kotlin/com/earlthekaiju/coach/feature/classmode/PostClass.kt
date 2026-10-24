@@ -111,9 +111,11 @@ fun PostClassDestination(onDone: () -> Unit, onAttendance: (String) -> Unit) {
 fun PostClassScreen(state: PostClassUiState, onSaveNote: (String) -> Unit, onDone: () -> Unit, onAttendance: () -> Unit) {
     val colors = Kaiju.colors
     var note by remember { mutableStateOf("") }
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    // imePadding on the whole screen: with the keyboard up the scroll area shrinks (keeping the
+    // focused field in view) and the bottom action bar sits right above the keyboard.
+    Column(Modifier.fillMaxSize().background(colors.background).imePadding()) {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).imePadding().padding(horizontal = KaijuSpace.gutter),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = KaijuSpace.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.readableWidth().windowInsetsPadding(WindowInsets.statusBars).padding(top = KaijuSpace.l)) {

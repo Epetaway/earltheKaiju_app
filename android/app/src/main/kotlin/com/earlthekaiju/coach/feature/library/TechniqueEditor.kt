@@ -119,7 +119,9 @@ fun TechniqueEditorScreen(
     val colors = Kaiju.colors
     var confirmDelete by remember { mutableStateOf(false) }
     val d = state.draft
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    // imePadding on the whole screen: with the keyboard up the scroll area shrinks (keeping the
+    // focused field in view) and the bottom action bar sits right above the keyboard.
+    Column(Modifier.fillMaxSize().background(colors.background).imePadding()) {
         KaijuTopBar(
             title = if (state.isNew) "Add technique" else d.name.ifBlank { "Technique" },
             eyebrow = "Library",
@@ -131,7 +133,7 @@ fun TechniqueEditorScreen(
             return@Column
         }
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).imePadding().padding(horizontal = KaijuSpace.gutter),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = KaijuSpace.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.readableWidth().padding(top = KaijuSpace.m)) {

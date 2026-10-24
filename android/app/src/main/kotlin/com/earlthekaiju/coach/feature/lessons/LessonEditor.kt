@@ -1,6 +1,7 @@
 package com.earlthekaiju.coach.feature.lessons
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -245,10 +246,16 @@ fun LessonEditorScreen(state: LessonEditorUiState, actions: LessonEditorActions)
     val colors = Kaiju.colors
     var dialog by remember { mutableStateOf<LessonDialog>(LessonDialog.None) }
     val d = state.draft
+    // Opening a segment sheet drops focus from the form, so the keyboard doesn't pop back up
+    // over the builder when the sheet closes.
+    val focusManager = LocalFocusManager.current
+    val openSegment = { id: String -> focusManager.clearFocus(); dialog = LessonDialog.Segment(id) }
     val back = { if (state.dirty) dialog = LessonDialog.Discard else actions.onClose() }
     BackHandler(enabled = state.dirty) { dialog = LessonDialog.Discard }
 
-    Column(Modifier.fillMaxSize().background(colors.background)) {
+    // imePadding on the whole screen: with the keyboard up the scroll area shrinks (keeping the
+    // focused field in view) and the bottom action bar sits right above the keyboard.
+    Column(Modifier.fillMaxSize().background(colors.background).imePadding()) {
         KaijuTopBar(
             title = if (state.isNew) "New lesson plan" else d.title.ifBlank { "Lesson plan" },
             eyebrow = "Lesson builder",
@@ -260,7 +267,7 @@ fun LessonEditorScreen(state: LessonEditorUiState, actions: LessonEditorActions)
             return@Column
         }
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).imePadding().padding(horizontal = KaijuSpace.gutter),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = KaijuSpace.gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(Modifier.readableWidth()) {
@@ -307,7 +314,7 @@ fun LessonEditorScreen(state: LessonEditorUiState, actions: LessonEditorActions)
                         count = d.segments.size,
                         segment = seg,
                         techniqueNames = seg.techniqueIds.mapNotNull(state::techniqueName),
-                        onEdit = { dialog = LessonDialog.Segment(seg.id) },
+                        onEdit = { openSegment(seg.id) },
                         onMove = { delta -> actions.onMoveSegment(seg.id, delta) },
                     )
                     HairlineDivider(Modifier.fillMaxWidth())
@@ -315,7 +322,7 @@ fun LessonEditorScreen(state: LessonEditorUiState, actions: LessonEditorActions)
                 Spacer(Modifier.height(KaijuSpace.s))
                 KaijuButton(
                     "Add segment",
-                    { dialog = LessonDialog.Segment(actions.onAddSegment()) },
+                    { openSegment(actions.onAddSegment()) },
                     Modifier.fillMaxWidth(),
                     variant = ButtonVariant.Secondary,
                     icon = KaijuIcons.Add,
