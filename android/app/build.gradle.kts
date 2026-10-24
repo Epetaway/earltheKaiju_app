@@ -18,7 +18,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Swaps in a test Application (fresh in-memory data, a clock starting on a known evening).
+        testInstrumentationRunner = "com.earlthekaiju.coach.device.KaijuTestRunner"
     }
 
     buildTypes {
@@ -116,4 +117,12 @@ dependencies {
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)
     testImplementation(libs.androidx.room.testing)
+
+    // Instrumented tests on an emulator or phone (CI "Device run" job).
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4.accessibility)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
