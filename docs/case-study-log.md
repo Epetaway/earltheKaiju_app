@@ -52,6 +52,14 @@ nav bar, the class facts and attendance rows.
 text; single-line labels auto-size. Landscape gets its own hero scale. The failing pair became
 Ivory. An end-to-end test now drives the real activity from empty app to finished class.
 
+**What the end-to-end test caught.** Its first run stalled while stepping quickly through
+segments: taps landed before the screen had caught up with the previous one. Investigating it
+turned up a real weakness: a segment change was several separate database writes that two fast
+taps could interleave. The test now waits for each segment, and segment changes are a single
+transaction with a regression test.
+Its screenshots also exposed two small things the static renders hid: a class name breaking
+mid-word at large text, and struck-through "done" segments that read as cancelled.
+
 **Takeaway for the case study.** Rendering every state in CI made the review concrete: each
 fix was confirmed by re-rendering the same state from the same code. For the case study, keep
 future before/after pairs by saving the screenshot folder before each QA pass (the CI report
