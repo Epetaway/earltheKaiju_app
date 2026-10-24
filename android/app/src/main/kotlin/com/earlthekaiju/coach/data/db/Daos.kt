@@ -253,6 +253,27 @@ interface SessionDao {
         upsert(session)
     }
 
+    /**
+     * Moves a live class to segment [index] in one transaction: earlier segments end, the target
+     * restarts, later ones reset. Atomic so two quick taps can't interleave half-written rows.
+     */
+    @Transaction
+    suspend fun goToSegment(id: String, index: Int, now: Long) {
+        val session = get(id) ?: return
+        val segments = getSegments(id)
+        if (index !in segments.indices) return
+        segments.forEach { s ->
+            val updated = when {
+                s.position < index && s.endedAt == null -> s.copy(endedAt = now, startedAt = s.startedAt ?: now, updatedAt = now)
+                s.position == index -> s.copy(startedAt = now, endedAt = null, updatedAt = now)
+                s.position > index && (s.startedAt != null || s.endedAt != null) -> s.copy(startedAt = null, endedAt = null, updatedAt = now)
+                else -> null
+            }
+            if (updated != null) upsertSegment(updated)
+        }
+        upsert(session.copy(currentSegmentIndex = index, currentSegmentStartedAt = now, updatedAt = now))
+    }
+
     @Query("SELECT * FROM session_note WHERE sessionId = :sessionId AND deletedAt IS NULL ORDER BY createdAt")
     fun observeNotes(sessionId: String): Flow<List<SessionNoteEntity>>
 

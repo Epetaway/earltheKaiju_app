@@ -144,6 +144,27 @@ class RepositoryTest {
     }
 
     @Test
+    fun `stepping back in class mode reopens that segment and resets later ones`() = runTest {
+        val planId = lessons().save(
+            LessonPlanDraft(title = "Plan", segments = listOf("A", "B", "C", "D").map { SegmentDraft(title = it, minutes = 5) }),
+        )
+        val id = sessions().save(SessionDraft(lessonPlanId = planId, date = LocalDate.of(2026, 10, 20)))
+        sessions().start(id)
+        for (i in 1..3) { clock.advance(5); sessions().goToSegment(id, i) }
+        clock.advance(1)
+        sessions().goToSegment(id, 1)
+        sessions().goToSegment(id, 9) // out of range: ignored
+
+        val segs = sessions().observeSegments(id).first()
+        assertEquals(1, sessions().get(id)!!.currentSegmentIndex)
+        assertNotNull(segs[0].endedAt)
+        assertNotNull(segs[1].startedAt)
+        assertEquals(null, segs[1].endedAt)
+        assertEquals(listOf(null, null), segs.drop(2).map { it.startedAt })
+        assertEquals(listOf(null, null), segs.drop(2).map { it.endedAt })
+    }
+
+    @Test
     fun `attendance marks, undo and restore after restart`() = runTest {
         val programs = ProgramRepository(db, clock)
         val kids = programs.save(ProgramDraft(name = "Kids", audience = Audience.KIDS))

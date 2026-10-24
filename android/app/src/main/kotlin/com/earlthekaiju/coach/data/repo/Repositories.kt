@@ -265,22 +265,7 @@ class SessionRepository(private val db: KaijuDatabase, private val clock: AppClo
     }
 
     /** Moves Class Mode to [index], closing earlier segments and opening the new one. */
-    suspend fun goToSegment(id: String, index: Int) {
-        val session = dao.get(id) ?: return
-        val segments = dao.getSegments(id)
-        if (index !in segments.indices) return
-        val now = clock.now()
-        segments.forEach { s ->
-            val updated = when {
-                s.position < index && s.endedAt == null -> s.copy(endedAt = now, startedAt = s.startedAt ?: now, updatedAt = now)
-                s.position == index -> s.copy(startedAt = now, endedAt = null, updatedAt = now)
-                s.position > index && (s.startedAt != null || s.endedAt != null) -> s.copy(startedAt = null, endedAt = null, updatedAt = now)
-                else -> null
-            }
-            if (updated != null) dao.upsertSegment(updated)
-        }
-        dao.upsert(session.copy(currentSegmentIndex = index, currentSegmentStartedAt = now, updatedAt = now))
-    }
+    suspend fun goToSegment(id: String, index: Int) = dao.goToSegment(id, index, clock.now())
 
     suspend fun finish(id: String) {
         val session = dao.get(id) ?: return
