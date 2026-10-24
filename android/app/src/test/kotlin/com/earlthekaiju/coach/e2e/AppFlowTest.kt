@@ -1,5 +1,6 @@
 package com.earlthekaiju.coach.e2e
 
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
@@ -12,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.earlthekaiju.coach.KaijuCoachApp
 import com.earlthekaiju.coach.MainActivity
@@ -63,9 +65,19 @@ class E2eApp : KaijuCoachApp() {
 class AppFlowTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
+    /**
+     * Waits for [text] (exact case) to appear. On timeout, fails with the current semantics tree
+     * and saves a screenshot, so a CI failure shows what was actually on screen.
+     */
     private fun waitForText(text: String, substring: Boolean = false, timeout: Long = 10_000) {
-        compose.waitUntil(timeout) {
-            compose.onAllNodesWithText(text, substring = substring, ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
+        try {
+            compose.waitUntil(timeout) {
+                compose.onAllNodesWithText(text, substring = substring).fetchSemanticsNodes().isNotEmpty()
+            }
+        } catch (e: ComposeTimeoutException) {
+            runCatching { shot("13x-failure") }
+            val tree = runCatching { compose.onRoot().printToString(maxDepth = 40) }.getOrElse { "(tree unavailable: $it)" }
+            throw AssertionError("Timed out waiting for \"$text\". Screen:\n$tree", e)
         }
     }
 
@@ -98,12 +110,11 @@ class AppFlowTest {
         waitForText("MOVEMENT PREPARATION")
         shot("13b-app-class-mode")
 
-        // Step through the remaining segments.
-        repeat(3) {
+        // Step through the remaining segments, waiting for each to become current.
+        for (title in listOf("GUARD RETENTION CONCEPTS", "PARTNER DRILLING", "POSITIONAL SPARRING")) {
             tap("Next segment")
-            compose.waitForIdle()
+            waitForText(title)
         }
-        waitForText("POSITIONAL SPARRING")
         waitForText("Finish class")
 
         // Finish (hero button, then the confirm dialog).
@@ -127,7 +138,7 @@ class AppFlowTest {
         tap("Students")
         waitForText("Ana Ribeiro")
         tap("Ana Ribeiro")
-        waitForText("Attendance history", substring = true, timeout = 10_000)
+        waitForText("ATTENDANCE HISTORY")
         waitForText("Blue belt", substring = true)
         shot("13e-app-student-detail")
     }

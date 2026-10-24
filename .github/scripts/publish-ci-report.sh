@@ -33,7 +33,7 @@ for f in sorted(glob.glob('android/app/build/test-results/**/*.xml', recursive=T
         name = f"{tc.get('classname')}.{tc.get('name')}"
         if bad is not None:
             fails += 1
-            lines.append(f"FAIL {name}\n    {(bad.get('message') or '')[:600]}\n" + (bad.text or '')[:2500])
+            lines.append(f"FAIL {name}\n    {(bad.get('message') or '')[:600]}\n" + (bad.text or '')[:15000])
         else:
             lines.append(f"ok   {name} ({tc.get('time')}s)")
 open(sys.argv[1], 'w').write(f"{total} tests, {fails} failed\n\n" + "\n".join(lines) + "\n")
