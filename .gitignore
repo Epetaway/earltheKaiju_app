@@ -46,3 +46,7 @@ media/private/
 # --- Node (future desktop companion) ---
 node_modules/
 dist/
+
+# Phone and emulator test runs (screenshots show the device status bar)
+/device-test/
+/device-out/

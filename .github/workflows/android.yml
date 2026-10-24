@@ -114,6 +114,13 @@ jobs:
         shell: bash
         run: ./gradlew assembleDebug assembleDebugAndroidTest --stacktrace 2>&1 | tee ../ci-device-build.log; exit ${PIPESTATUS[0]}
 
+      - name: Keep the APKs for running the same test on a phone
+        if: steps.build.outcome == 'success'
+        run: |
+          mkdir -p device-out/apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk device-out/apk/
+          cp android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk device-out/apk/
+
       - name: Run the class flow on an API 35 Pixel 7 emulator
         id: device
         if: steps.build.outcome == 'success'

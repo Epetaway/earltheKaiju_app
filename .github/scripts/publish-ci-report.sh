@@ -46,6 +46,8 @@ PY
 if [ "$KIND" = "device" ]; then
   cp device-out/shots/*.png "$OUT/screenshots/" 2>/dev/null || true
   cp device-out/device.txt device-out/logcat.txt "$OUT/" 2>/dev/null || true
+  # The debug app and its instrumented test, for android/scripts/run-on-phone.sh.
+  mkdir -p "$OUT/apk" && cp device-out/apk/*.apk "$OUT/apk/" 2>/dev/null || true
   summarize_tests 'android/app/build/outputs/androidTest-results/**/*.xml'
   STATUS_FIELDS="\"build\": \"${BUILD:-}\", \"device\": \"${DEVICE:-}\","
 else
