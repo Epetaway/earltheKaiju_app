@@ -74,3 +74,17 @@ dates, contacts, photos or medical data.
 **Why.** Children's data; only store what serves teaching. Contact details stay in the website's
 inquiry flow.
 **Cost.** Parent contact lookup happens outside the app for now.
+
+### ADR-012 · Sprint 01 sign-off
+**Decision.** On 2026-10-24 Earl approved the Sprint 01 open items ("Yes to all"):
+- The visual direction stands as built: Shadow-only theme, editorial condensed headings,
+  chamfered shapes, emerald for action, spectral for live, gold for labels, rank and rest, and
+  the crest on the launcher and in Settings only.
+- The repository stays **public** for now. That makes it a readable portfolio piece and keeps CI
+  minutes free. Real student data and private media never enter git by design: data lives on the
+  phone, and backups and phone screenshots are git-ignored.
+- The code stays **all rights reserved** (`NOTICE.md`) until a license is chosen on purpose.
+- `main` is protected: changes arrive through a pull request with both CI checks passing.
+- PR #1 merges into `main`.
+**Cost.** A public repo makes the brand artwork easy to download; `NOTICE.md` states ownership.
+Revisit visibility before any private assets are added.

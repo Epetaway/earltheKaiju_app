@@ -87,7 +87,7 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 |---|---|---|
 | Initialized in the existing GitHub repository | Met | `Epetaway/earltheKaiju_app`, branch `sprint/01-foundation`, PR #1; `main` untouched |
 | Coherent Earl the Kaiju design system | Met | [03-design-system.md](03-design-system.md), `designsystem/`, sheets 10–11 |
-| Core screens have professional, consistent UI | Met, pending Earl's design review | Screenshots and this review |
+| Core screens have professional, consistent UI | Met; Earl approved the direction 2026-10-24 (ADR-012) | Screenshots and this review |
 | Navigation functions | Met | Both flow tests; back, restart and rotation covered |
 | Create and edit a lesson plan | Met | Flow tests (create, rename, add, reorder); repository test (save, reorder, reload) |
 | Schedule a class | Met | Flow tests |
