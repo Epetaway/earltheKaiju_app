@@ -15,7 +15,7 @@ attendance and my roster. It works with no internet connection, and student data
 | ![Today](docs/screenshots/sprint-01/01-today.png) | ![Class Mode](docs/screenshots/sprint-01/04-class-mode.png) | ![Timer](docs/screenshots/sprint-01/05-timer-work.png) | ![Attendance](docs/screenshots/sprint-01/07-attendance.png) |
 
 Every screenshot is rendered from the real Compose code by CI (Roborazzi), with fictional data.
-All 45 screen states are in [`docs/screenshots/sprint-01`](docs/screenshots/sprint-01/README.md).
+All 45 screen states are in [`docs/screenshots/sprint-01`](docs/screenshots/sprint-01/README.md); full-screen captures from the emulator run are in [`device/`](docs/screenshots/sprint-01/device/README.md).
 
 ## Repository layout
 
@@ -46,6 +46,19 @@ Or download the debug APK from the latest successful run in the repository's **A
 (artifact `kaiju-coach-debug-apk`) and install it on the phone. The debug build installs alongside
 any future release build (`com.earlthekaiju.coach.debug`) and has **Settings › Load sample data**
 for trying the app with fictional students.
+
+### Run it on your phone
+
+Plug an Android phone into the Mac with USB debugging on, put CI's two APKs (or your own
+`assembleDebug assembleDebugAndroidTest` outputs) in `device-test/apk/`, then:
+
+```bash
+bash android/scripts/run-on-phone.sh
+```
+
+It installs the debug app and runs the full class-flow test on the phone, with accessibility
+checks. Screenshots and logs go to `device-test/<time>/`, which is git-ignored because they show
+your status bar. The app stays installed afterward.
 
 ## Documentation
 

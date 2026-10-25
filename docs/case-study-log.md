@@ -89,6 +89,27 @@ unsaved changes without asking, unlike the other editors.
 **Takeaway.** Fast renders are good for breadth: every state at every text size. A real system
 is good for depth: insets, input methods and accessibility services. Both now run on every push.
 
+## 2026-10-24 · First run on a real phone
+
+**Setup.** Earl's Samsung Galaxy Note10+ 5G (Android 12, One UI 4.1), plugged into his Mac over
+USB. `android/scripts/run-on-phone.sh` installs the exact APKs CI built and tested, runs
+`DeviceFlowTest` on the phone, and pulls back its screenshots. The phone screenshots are kept
+out of git because they show the personal status bar.
+
+**Result.** The whole slice passed on the phone in 42 seconds, accessibility checks included.
+
+**What the phone caught.** The phone uses 3-button navigation, a 48 dp bar where the emulator
+had a thin gesture handle. On screens without the app's tab bar, content sat under the system
+buttons: the class timer's preset summary, snackbars, and the end of scrolling screens. All three
+are fixed.
+
+**Takeaway.** Each step up the ladder found something the one below couldn't:
+- Fast renders found layout and text-size problems.
+- The emulator found inset, keyboard and accessibility problems.
+- The real phone found navigation-mode problems.
+
+The hand-held checks are still to come: sound in a loud room, glare and sweaty hands.
+
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.

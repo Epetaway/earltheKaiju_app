@@ -18,6 +18,7 @@ bars, keyboard, rotation, accessibility services).
 | Responsive | Bottom bar under 600 dp, nav rail at 600 dp+, content capped at 640 dp, Class Mode and Timer re-laid out for landscape | Screens 04d, 05g, 12 |
 | Real-world use | Readable from across the mat, operable with one hand, nothing needs the network, screen stays on in Class Mode, no data loss on rotate, process death or accidental back | Tests + screens 04, 05 |
 | Device run | The whole vertical slice on an Android 15 Pixel 7 emulator: Accessibility Test Framework checks (labels, touch targets, contrast, traversal) on every tap and text entry; landscape rotation mid-class; keyboard over a form; activity restart | `docs/screenshots/sprint-01/device/` |
+| Physical phone | The same device flow on Earl's Samsung Galaxy Note10+ 5G (Android 12, One UI 4.1, 3-button navigation) over USB with `android/scripts/run-on-phone.sh` | Screenshots kept off git (they show the personal status bar) |
 | Engineering | Build, 67 unit/Robolectric tests plus the instrumented device flow, lint clean, Room schema exported | CI report on the `ci-reports` branch |
 
 ## Findings and fixes
@@ -50,6 +51,10 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 22 | No side insets: in landscape, 3-button navigation or a camera cutout could cover content. | Medium | Horizontal safe-drawing insets are applied app-wide. | `29fb1e2` |
 | 23 | Closing a lesson segment sheet brought the keyboard back over the builder. | Low | Opening a segment sheet clears form focus first. | `29fb1e2` |
 | 24 | The emulator's own "Pixel Launcher isn't responding" dialog covered the first device screenshots. It was a CI environment issue, not an app issue. | CI | Error dialogs are hidden on the emulator before the run. | `7cb66b2` |
+| 25 | On the Samsung (3-button navigation, 48 dp): the class timer's preset summary sat under the system navigation buttons. | High | The timer pads for the navigation bar; under the tab bar the scaffold's padding is consumed so nothing doubles. | `e7609b7` |
+| 26 | On the Samsung: snackbars ("Sample data loaded", Undo) on screens without the tab bar overlapped the navigation buttons. | Medium | The snackbar host clears the navigation bar and the keyboard when there is no tab bar. | `e7609b7` |
+| 27 | On the Samsung: the last content on Settings, class detail, student detail, programs and attendance could rest under the navigation buttons. | Medium | Bottom spacing includes the navigation bar. | `e7609b7` |
+| 28 | Scrolled content slid under the transparent status bar and collided with the clock (seen on the post-class screen). | Low | A status-bar scrim in the screen color; nothing changes at rest. | this PR |
 
 ## Open watch items
 
@@ -69,10 +74,12 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
   mode; decide after real use.
 - **Strings live in Kotlin**, not `strings.xml`. Fine for a single-language private app; move
   them before any translation.
-- **Not yet run on a physical phone.** It runs on an emulator in CI, with automated
-  accessibility checks, but nothing automated can judge TalkBack flow by ear, speaker volume in
-  a loud room, glare at a distance, or touch accuracy with sweaty hands. The on-device checklist
-  is in [07-timer-platform-behavior.md](07-timer-platform-behavior.md#device-checklist-for-earl).
+- **One physical phone so far.** The device flow passed on the Galaxy Note10+ (Android 12)
+  before fixes #25–27; the re-run after them is pending (the Mac was locked). Nothing automated
+  can judge TalkBack by ear, cue volume in a loud room, glare at a distance, or touch accuracy
+  with sweaty hands: that is the on-device checklist in
+  [07-timer-platform-behavior.md](07-timer-platform-behavior.md#device-checklist-for-earl), done
+  by hand on the mat.
 
 ## Acceptance criteria (kickoff brief §14)
 
@@ -93,7 +100,7 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 | Works without internet | Met by construction | No `INTERNET` permission in the manifest, so the app cannot use the network |
 | Meaningful automated tests | Met | 68 tests (below) |
 | Completed features clearly documented | Met | Status per screen in [04-screen-specs.md](04-screen-specs.md), README, PR |
-| UI reviewable through real previews or screenshots | Met | `docs/screenshots/sprint-01/` (Robolectric) and `.../device/` (emulator) |
+| UI reviewable through real previews or screenshots | Met | `docs/screenshots/sprint-01/` (Robolectric), `.../device/` (emulator), and a run on Earl's Samsung |
 | Architecture ready for desktop sync | Met (designed) | [06-sync-architecture.md](06-sync-architecture.md); schema v1 has UUIDs, timestamps and tombstones; `contracts/` |
 
 ## Verification at the end of the sprint
@@ -103,4 +110,6 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 - Tests (68): timer engine (12), repositories against a real Room database (10), timer restore
   after process death and reboot (3), rendered screens (40), end-to-end flows under Robolectric
   (2), and the device flow on an emulator with accessibility checks (1).
+- Physical phone: `DeviceFlowTest` passed on a Samsung Galaxy Note10+ 5G (Android 12) over USB,
+  in 42 seconds, with the same accessibility checks.
 - Lint: no issues.

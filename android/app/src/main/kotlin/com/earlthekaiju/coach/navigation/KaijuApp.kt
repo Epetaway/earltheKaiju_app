@@ -1,5 +1,9 @@
 package com.earlthekaiju.coach.navigation
 
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.ime
@@ -142,6 +146,10 @@ fun KaijuApp(container: AppContainer) {
                         KaijuNavHost(navController, Modifier.weight(1f))
                     }
                 }
+                // Status-bar scrim: screens start below the status bar, but scrolled content would
+                // otherwise slide under the clock and icons (edge-to-edge). Same color as the screen,
+                // so nothing changes at rest.
+                Box(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(Kaiju.colors.background))
             }
         }
     }
