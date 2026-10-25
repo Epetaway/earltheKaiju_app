@@ -1,0 +1,164 @@
+name: Android CI
+
+on:
+  # Pushes cover PR branches too (the PR shows the head commit's checks), so there is no
+  # separate pull_request trigger: each push runs once, which halves Actions minutes.
+  push:
+    branches-ignore: [ci-reports]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # publish-ci-report.sh pushes logs and screenshots to the ci-reports branch
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Build, test, lint, screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble debug APK
+        id: assemble
+        continue-on-error: true
+        working-directory: android
+        shell: bash
+        run: ./gradlew assembleDebug --stacktrace 2>&1 | tee ../ci-assemble.log; exit ${PIPESTATUS[0]}
+
+      - name: Unit tests and screenshots (Robolectric + Roborazzi)
+        id: tests
+        if: steps.assemble.outcome == 'success'
+        continue-on-error: true
+        working-directory: android
+        shell: bash
+        run: ./gradlew recordRoborazziDebug --stacktrace 2>&1 | tee ../ci-tests.log; exit ${PIPESTATUS[0]}
+
+      - name: Android lint
+        id: lint
+        if: steps.assemble.outcome == 'success'
+        continue-on-error: true
+        working-directory: android
+        shell: bash
+        run: ./gradlew lintDebug 2>&1 | tee ../ci-lint.log; exit ${PIPESTATUS[0]}
+
+      - name: Publish report to ci-reports branch
+        if: always()
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSEMBLE: ${{ steps.assemble.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+        run: bash .github/scripts/publish-ci-report.sh
+
+      - name: Upload debug APK
+        if: steps.assemble.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaiju-coach-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Upload test and lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaiju-coach-reports
+          path: |
+            android/app/build/reports/
+            android/app/build/outputs/roborazzi/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Fail the job if any check failed
+        if: steps.assemble.outcome != 'success' || steps.tests.outcome != 'success' || steps.lint.outcome != 'success'
+        run: |
+          echo "assemble=${{ steps.assemble.outcome }} tests=${{ steps.tests.outcome }} lint=${{ steps.lint.outcome }}"
+          exit 1
+
+  device:
+    name: Device run (Android emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build app and instrumented test APKs
+        id: build
+        continue-on-error: true
+        working-directory: android
+        shell: bash
+        run: ./gradlew assembleDebug assembleDebugAndroidTest --stacktrace 2>&1 | tee ../ci-device-build.log; exit ${PIPESTATUS[0]}
+
+      - name: Keep the APKs for running the same test on a phone
+        if: steps.build.outcome == 'success'
+        run: |
+          mkdir -p device-out/apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk device-out/apk/
+          cp android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk device-out/apk/
+
+      - name: Run the class flow on an API 35 Pixel 7 emulator
+        id: device
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          working-directory: android
+          script: bash ../.github/scripts/run-device-tests.sh
+
+      - name: Publish device report to ci-reports branch
+        if: always()
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT_KIND: device
+          BUILD: ${{ steps.build.outcome }}
+          DEVICE: ${{ steps.device.outcome }}
+        run: bash .github/scripts/publish-ci-report.sh
+
+      - name: Upload device screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaiju-coach-device-run
+          path: |
+            device-out/
+            android/app/build/outputs/androidTest-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Fail the job if the device run failed
+        if: steps.build.outcome != 'success' || steps.device.outcome != 'success'
+        run: |
+          echo "build=${{ steps.build.outcome }} device=${{ steps.device.outcome }}"
+          exit 1
