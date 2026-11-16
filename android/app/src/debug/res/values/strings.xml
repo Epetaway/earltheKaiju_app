@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The debug build installs beside the personal build; a different launcher name keeps the
+     two apart on the phone. -->
+<resources>
+    <string name="app_name">Kaiju Test</string>
+</resources>

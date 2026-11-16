@@ -88,3 +88,33 @@ inquiry flow.
 - PR #1 merges into `main`.
 **Cost.** A public repo makes the brand artwork easy to download; `NOTICE.md` states ownership.
 Revisit visibility before any private assets are added.
+
+### ADR-013 · Personal builds for Earl's phone
+**Decision.** On 2026-11-16, for day-to-day testing on Earl's Pixel 9:
+- The **release build** is the personal build: package `com.earlthekaiju.coach`, no sample-data
+  tools. It is signed with a stable personal key. CI publishes it as a GitHub Release after a
+  merge into `main` passes every check, at a fixed link the phone can open.
+- The keys live only in the `KAIJU_SIGNING_BUNDLE` repository secret and Earl's password manager.
+  Debug jobs only ever unpack the CI debug key.
+- **CI debug builds** ("Kaiju Test") share their own stable key, separate from the release key, so
+  each installs over the last.
+- The **version code** is the CI run number, so every build installs over the one before it.
+- CI refuses to publish an APK unless its certificate matches the expected fingerprint.
+- The device run covers a **Pixel 9 on Android 17** (Earl's phone) as well as the Pixel 7 on
+  Android 15.
+
+**Why.** Each CI run used to sign with a fresh debug key. Installing a newer build over an app
+holding real data meant uninstalling it, which deletes the data (QA #30). A GitHub Release is
+the simplest way to get the APK onto a phone without a cable or a Mac. It needs no paid
+infrastructure and no Play Store listing.
+
+**Cost.**
+- Releases are public while the repository is. The APK holds no keys or data.
+- Losing both copies of the key would force an uninstall on every phone, so the backup is
+  required.
+- Android Studio builds are signed by a different key and can't update CI-installed apps.
+- Google's developer verification reaches the US in 2027. Then the app needs a free
+  limited-distribution registration, adb installs or the advanced flow. The stable key makes
+  registration possible.
+
+Details: [10-personal-builds.md](10-personal-builds.md).

@@ -69,7 +69,9 @@ import java.time.Instant
 data class SettingsUiState(
     val settings: AppSettings = AppSettings(),
     val programCount: Int = 0,
-    val versionName: String = BuildConfig.VERSION_NAME,
+    // The build number matches the GitHub release ("build 57"), so it's easy to tell whether
+    // the phone has the latest personal build.
+    val versionName: String = "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}",
     val showDebugTools: Boolean = BuildConfig.DEBUG,
 )
 
@@ -190,7 +192,8 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                     Spacer(Modifier.width(KaijuSpace.m))
                     Column {
                         Text("KAIJU COACH", style = Kaiju.type.title, color = colors.ink)
-                        Eyebrow("Earl the Kaiju · v${state.versionName}")
+                        Eyebrow("Earl the Kaiju")
+                        Text("Version ${state.versionName}", style = Kaiju.type.caption, color = colors.inkMuted)
                     }
                 }
                 Spacer(Modifier.height(KaijuSpace.m))

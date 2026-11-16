@@ -131,6 +131,44 @@ signing key (kept as a secret, never committed).
 **Screenshots.** The 17 captures, cropped to the app with the system bars removed, went into
 Earl's screenshot library (`Dev/Screenshots/earltheKaiju/`, `*-samsung.png`) with alt text.
 
+## 2026-11-16 · A build that can live on the phone
+
+**Why.** Testing on a phone over a cable proves the app works. It doesn't make it safe to put
+real classes and students in it. Every CI build had its own signing key, and Android only lets an
+update install over an app signed by the same key. So the first update would have meant
+uninstalling, and uninstalling deletes everything.
+
+**What changed.**
+- A personal build, signed with a permanent key.
+- After a merge into `main` passes every check, CI publishes it as a GitHub Release, at one link
+  the Pixel opens in Chrome.
+- Every build has a higher version code than the last, so it installs over the last one and
+  keeps the data.
+- The debug build became "Kaiju Test", a separate app with its own data and the sample-data
+  button.
+- The device run now includes a Pixel 9 on Android 17, matching the phone the app will live on.
+
+**Security decisions.**
+- The keys live in one repository secret and in Earl's password manager, never in git.
+- Debug jobs only ever unpack the debug key.
+- CI checks the certificate fingerprint before publishing, so a wrongly signed APK can't reach
+  the phone and strand the data.
+- The keys were generated outside the repository and handed over in a git-ignored folder. Their
+  passwords were never printed.
+
+**What Android 17 caught.** The first run on the Pixel 9 / Android 17 emulator failed before
+its first tap. The Android 17 failure was in the test tooling, not the app: the Espresso
+version that Compose's test library pulls in calls an Android method that Android 17 removed.
+Pinning Espresso 3.7.0 fixed it. The whole class flow then passed on Android 17, accessibility
+checks included.
+
+**Constraint found.** The AI development environment can't write repository secrets or rules.
+That's a sensible limit for an automated agent. So the two steps that hand over trust (adding
+the key, protecting `main`) are done by Earl, with the steps written down.
+
+**Looking ahead.** Google's developer verification reaches the US in 2027. A stable key is what
+makes registering the app possible then.
+
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.
