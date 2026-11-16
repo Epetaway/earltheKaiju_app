@@ -354,12 +354,12 @@ class ScreenshotTest {
     }
 
     @Test fun s09_settings() = snap("09-settings") {
-        SettingsScreen(SettingsUiState(settings = AppSettings(), programCount = 3, versionName = "0.1.0", showDebugTools = false), SettingsActions())
+        SettingsScreen(SettingsUiState(settings = AppSettings(), programCount = 3, versionName = "0.1.0 · build 57", showDebugTools = false), SettingsActions())
     }
 
     @Config(qualifiers = PHONE_TALL)
     @Test fun s09b_settings_full() = snap("09b-settings-full") {
-        SettingsScreen(SettingsUiState(settings = AppSettings(), programCount = 3, versionName = "0.1.0", showDebugTools = false), SettingsActions())
+        SettingsScreen(SettingsUiState(settings = AppSettings(), programCount = 3, versionName = "0.1.0 · build 57", showDebugTools = false), SettingsActions())
     }
 
     @Test fun s09c_programs() = snap("09c-programs") {

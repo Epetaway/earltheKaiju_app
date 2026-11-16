@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Runs Kaiju Coach's device flow test on an Android phone plugged into this Mac over USB, then
-# collects full-screen screenshots and logs. Leaves the debug app installed for hands-on use.
+# Runs Kaiju Coach's device flow test on an Android phone connected to this Mac (USB or wireless
+# debugging), then collects full-screen screenshots and logs. Leaves the debug app ("Kaiju Test")
+# installed for hands-on use. It never touches the personal build ("Kaiju Coach"): that's a
+# different app with its own data.
 #
 #   bash android/scripts/run-on-phone.sh [folder with the two APKs]
 #
@@ -56,20 +58,20 @@ if [ "$STATE" != "device" ]; then
   pick_device
 fi
 if [ "$STATE" != "device" ]; then
-  say "Samsung devices on this Mac's USB bus (serial numbers left out)"
-  USB="$(system_profiler SPUSBHostDataType SPUSBDataType 2>/dev/null | grep -iE -B3 -A10 'samsung|0x04e8' | grep -viE 'serial')"
+  say "Android phones on this Mac's USB bus (serial numbers left out)"
+  USB="$(system_profiler SPUSBHostDataType SPUSBDataType 2>/dev/null | grep -iE -B3 -A10 'samsung|0x04e8|google|pixel|0x18d1' | grep -viE 'serial')"
   if [ -n "$USB" ]; then
     echo "$USB"
     echo
     echo "The Mac sees the phone over USB, but adb can't use it yet: USB debugging is off,"
     echo "or the 'Allow USB debugging?' prompt on the phone hasn't been accepted."
   else
-    echo "None. The Mac doesn't see a Samsung phone over USB at all: try another cable"
-    echo "(some only charge) or another port, and unlock the phone."
+    echo "None. The Mac doesn't see an Android phone over USB at all: try another cable"
+    echo "(some only charge) or another port, and unlock the phone. Or use wireless debugging."
   fi
   echo
   echo "No authorized phone yet ($STATE). On the phone:"
-  echo "  1. Settings > About phone > Software information > tap Build number 7 times"
+  echo "  1. Settings > About phone (Samsung: then Software information) > tap Build number 7 times"
   echo "  2. Settings > Developer options > turn on USB debugging"
   echo "  3. Unplug and replug the cable, then tap Allow on the 'Allow USB debugging?' prompt"
   echo "  (Samsung: if installs are blocked, turn off Settings > Security and privacy > Auto Blocker)"
@@ -80,29 +82,33 @@ mkdir -p "$OUT/shots"
 {
   echo "Model:   $("$ADB" shell getprop ro.product.model | tr -d '\r')"
   echo "Android: $("$ADB" shell getprop ro.build.version.release | tr -d '\r') (API $("$ADB" shell getprop ro.build.version.sdk | tr -d '\r'))"
-  echo "One UI:  $("$ADB" shell getprop ro.build.version.oneui | tr -d '\r')"
+  ONEUI="$("$ADB" shell getprop ro.build.version.oneui | tr -d '\r')"
+  [ -n "$ONEUI" ] && echo "One UI:  $ONEUI"
   "$ADB" shell wm size | tr -d '\r'
   "$ADB" shell wm density | tr -d '\r'
   echo "Font scale: $("$ADB" shell settings get system font_scale | tr -d '\r')"
 } | tee "$OUT/device.txt"
 
-# Each CI build signs with its own debug key, so Android may refuse to update an earlier install
-# in place (INSTALL_FAILED_UPDATE_INCOMPATIBLE). The test package holds no data and is simply
-# replaced. The app itself may hold your own classes and students, so it is never removed here.
+# CI debug builds share one key (docs/10-personal-builds.md), so each installs over the last.
+# A build signed by another key (a local Android Studio build, or a CI build from before the
+# shared key) can't update in place (INSTALL_FAILED_UPDATE_INCOMPATIBLE). The test package holds
+# no data and is simply replaced. The debug app may hold classes and students you entered, so it
+# is never removed here. -d allows installing an older build over a newer one (debug builds only).
 install_apk() { # $1 apk, $2 package, $3 disposable|keep
   local out
-  out="$("$ADB" install -r -t "$1" 2>&1)"; echo "$out"
+  out="$("$ADB" install -r -t -d "$1" 2>&1)"; echo "$out"
   echo "$out" | grep -q "^Success" && return 0
   if echo "$out" | grep -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE"; then
     if [ "$3" = "disposable" ]; then
       echo "Replacing the earlier $2 (signed by another build; it holds no data)."
       "$ADB" uninstall "$2" > /dev/null 2>&1 || true
-      "$ADB" install -r -t "$1" && return 0
+      "$ADB" install -r -t -d "$1" && return 0
     else
       echo
-      echo "The Kaiju Coach debug app on the phone came from another build, so Android won't"
-      echo "update it in place. Removing it deletes the classes and students saved in it."
-      echo "If that's fine, uninstall Kaiju Coach on the phone, then run this again."
+      echo "The Kaiju Test app on the phone was signed by another key, so Android won't update it"
+      echo "in place. Removing it deletes the classes and students saved in Kaiju Test (your"
+      echo "personal Kaiju Coach app and its data are separate and stay as they are)."
+      echo "If that's fine, uninstall Kaiju Test on the phone, then run this again."
     fi
   fi
   return 1
@@ -126,4 +132,4 @@ say "Running the class flow on the phone (about 2 minutes; keep the phone unlock
 say "Result"
 if grep -q "OK (1 test)" "$OUT/instrument.txt"; then echo "PASSED"; else echo "FAILED (details in $OUT/instrument.txt)"; fi
 echo "Screenshots: $(ls "$OUT/shots" | wc -l | tr -d ' ') in $OUT/shots"
-echo "The debug app (Kaiju Coach, with a .debug suffix) stays installed for you to try."
+echo "The debug app (Kaiju Test) stays installed for you to try. Your personal build was not touched."
