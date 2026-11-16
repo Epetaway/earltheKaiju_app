@@ -25,9 +25,13 @@ if ! CERTS="$("$BT/apksigner" verify --print-certs "$APK" 2>&1)"; then
   echo "::error::$(basename "$APK") isn't signed (or its signature is broken)."
   exit 1
 fi
-ACTUAL="$(awk -F': ' '/^Signer #1 certificate SHA-256 digest/ {print $2}' <<< "$CERTS")"
-grep -E '^Signer #1 certificate (DN|SHA-256 digest)' <<< "$CERTS" || true
-[ -n "$ACTUAL" ] || { echo "$CERTS"; echo "::error::No signing certificate found in $(basename "$APK")."; exit 1; }
+# apksigner's wording varies by version ("Signer #1 certificate ...", "V2 Signer: certificate
+# ..."), so match the digest line itself. Every signature scheme must name the same certificate.
+grep -E 'certificate (DN|SHA-256 digest)' <<< "$CERTS" || true
+DIGESTS="$(awk '/certificate SHA-256 digest:/ {print tolower($NF)}' <<< "$CERTS" | sort -u)"
+[ -n "$DIGESTS" ] || { echo "$CERTS"; echo "::error::No signing certificate found in $(basename "$APK")."; exit 1; }
+[ "$(wc -l <<< "$DIGESTS")" -eq 1 ] || { echo "::error::$(basename "$APK") names more than one signing certificate."; exit 1; }
+ACTUAL="$DIGESTS"
 
 if [ "$EXPECTED" != "any" ] && [ "$ACTUAL" != "$EXPECTED" ]; then
   echo "::error::$(basename "$APK") is signed by $ACTUAL, not the expected $EXPECTED. It would not update the installed app."

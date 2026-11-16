@@ -60,7 +60,7 @@ jobs:
         continue-on-error: true
         working-directory: android
         shell: bash
-        run: ./gradlew assembleDebug assembleRelease --stacktrace 2>&1 | tee ../ci-assemble.log; exit ${PIPESTATUS[0]}
+        run: bash ../.github/scripts/gradle-retry.sh ../ci-assemble.log assembleDebug assembleRelease --stacktrace
 
       - name: Check the APK signatures
         id: signing
@@ -82,7 +82,7 @@ jobs:
         continue-on-error: true
         working-directory: android
         shell: bash
-        run: ./gradlew recordRoborazziDebug --stacktrace 2>&1 | tee ../ci-tests.log; exit ${PIPESTATUS[0]}
+        run: bash ../.github/scripts/gradle-retry.sh ../ci-tests.log recordRoborazziDebug --stacktrace
 
       - name: Android lint
         id: lint
@@ -90,7 +90,7 @@ jobs:
         continue-on-error: true
         working-directory: android
         shell: bash
-        run: ./gradlew lintDebug 2>&1 | tee ../ci-lint.log; exit ${PIPESTATUS[0]}
+        run: bash ../.github/scripts/gradle-retry.sh ../ci-lint.log lintDebug
 
       - name: Publish report to ci-reports branch
         if: always()
@@ -172,7 +172,7 @@ jobs:
         continue-on-error: true
         working-directory: android
         shell: bash
-        run: ./gradlew assembleDebug assembleDebugAndroidTest --stacktrace 2>&1 | tee ../ci-device-build.log; exit ${PIPESTATUS[0]}
+        run: bash ../.github/scripts/gradle-retry.sh ../ci-device-build.log assembleDebug assembleDebugAndroidTest --stacktrace
 
       - name: Keep the APKs for running the same test on a phone
         if: steps.build.outcome == 'success'
@@ -250,7 +250,7 @@ jobs:
       - name: Build the personal APK
         if: steps.keys.outputs.signed == 'true'
         working-directory: android
-        run: ./gradlew assembleRelease --stacktrace
+        run: bash ../.github/scripts/gradle-retry.sh ../ci-release.log assembleRelease --stacktrace
 
       - name: Confirm it is signed with the personal key
         id: check
