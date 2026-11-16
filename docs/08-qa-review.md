@@ -18,7 +18,7 @@ bars, keyboard, rotation, accessibility services).
 | Responsive | Bottom bar under 600 dp, nav rail at 600 dp+, content capped at 640 dp, Class Mode and Timer re-laid out for landscape | Screens 04d, 05g, 12 |
 | Real-world use | Readable from across the mat, operable with one hand, nothing needs the network, screen stays on in Class Mode, no data loss on rotate, process death or accidental back | Tests + screens 04, 05 |
 | Device run | The whole vertical slice on an Android 15 Pixel 7 emulator: Accessibility Test Framework checks (labels, touch targets, contrast, traversal) on every tap and text entry; landscape rotation mid-class; keyboard over a form; activity restart | `docs/screenshots/sprint-01/device/` |
-| Physical phone | The same device flow on Earl's Samsung Galaxy Note10+ 5G (Android 12, One UI 4.1, 3-button navigation) over USB with `android/scripts/run-on-phone.sh` | Screenshots kept off git (they show the personal status bar) |
+| Physical phone | The same device flow on Earl's Samsung Galaxy Note10+ 5G (Android 12, One UI 4.1, 3-button navigation) with `android/scripts/run-on-phone.sh`: over USB on 2026-10-24, and again over wireless debugging on 2026-11-16 after fixes #25–28 | Full screenshots kept off git (they show the personal status bar); cropped copies in Earl's local screenshot library |
 | Engineering | Build, 67 unit/Robolectric tests plus the instrumented device flow, lint clean, Room schema exported | CI report on the `ci-reports` branch |
 
 ## Findings and fixes
@@ -54,7 +54,9 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 25 | On the Samsung (3-button navigation, 48 dp): the class timer's preset summary sat under the system navigation buttons. | High | The timer pads for the navigation bar; under the tab bar the scaffold's padding is consumed so nothing doubles. | `e7609b7` |
 | 26 | On the Samsung: snackbars ("Sample data loaded", Undo) on screens without the tab bar overlapped the navigation buttons. | Medium | The snackbar host clears the navigation bar and the keyboard when there is no tab bar. | `e7609b7` |
 | 27 | On the Samsung: the last content on Settings, class detail, student detail, programs and attendance could rest under the navigation buttons. | Medium | Bottom spacing includes the navigation bar. | `e7609b7` |
-| 28 | Scrolled content slid under the transparent status bar and collided with the clock (seen on the post-class screen). | Low | A status-bar scrim in the screen color; nothing changes at rest. | this PR |
+| 28 | Scrolled content slid under the transparent status bar and collided with the clock (seen on the post-class screen). | Low | A status-bar scrim in the screen color; nothing changes at rest. | `22bc0db` |
+| 29 | Over wireless debugging adb lists the phone twice (its IP address and an mDNS name), so the phone runner's `adb get-state` failed with "more than one device". | Tooling | The runner picks the first ready entry; `ANDROID_SERIAL` still wins. | `a84998c`, `f785f58` |
+| 30 | Re-installing on the phone failed: the old test package came from a different CI build, and each build signs with its own debug key (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). | Tooling | The runner replaces the test package, which holds no data. It never uninstalls the app itself, which may hold real classes and students, and explains the choice instead. | `a84998c` |
 
 ## Open watch items
 
@@ -74,8 +76,14 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
   mode; decide after real use.
 - **Strings live in Kotlin**, not `strings.xml`. Fine for a single-language private app; move
   them before any translation.
-- **One physical phone so far.** The device flow passed on the Galaxy Note10+ (Android 12)
-  before fixes #25–27; the re-run after them is pending (the Mac was locked). Nothing automated
+- **Debug builds from different CI runs can't update each other.** Each run signs with a fresh
+  debug key, so installing a newer CI build over a debug app that holds real data means
+  uninstalling it first, which deletes that data. Fix before teaching with real students: a stable
+  debug signing key kept as a GitHub Actions secret, never committed. Until then, export a backup
+  before updating.
+- **One physical phone so far.** The device flow passed on the Galaxy Note10+ (Android 12) on
+  2026-10-24, and again on 2026-11-16 after fixes #25–28, where every screen it captures cleared
+  the 3-button navigation bar. Nothing automated
   can judge TalkBack by ear, cue volume in a loud room, glare at a distance, or touch accuracy
   with sweaty hands: that is the on-device checklist in
   [07-timer-platform-behavior.md](07-timer-platform-behavior.md#device-checklist-for-earl), done
@@ -85,7 +93,7 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
 
 | Criterion | Status | Evidence |
 |---|---|---|
-| Initialized in the existing GitHub repository | Met | `Epetaway/earltheKaiju_app`, branch `sprint/01-foundation`, PR #1; `main` untouched |
+| Initialized in the existing GitHub repository | Met | `Epetaway/earltheKaiju_app`; built on `sprint/01-foundation` and merged into `main` as PR #1 on 2026-10-24 |
 | Coherent Earl the Kaiju design system | Met | [03-design-system.md](03-design-system.md), `designsystem/`, sheets 10–11 |
 | Core screens have professional, consistent UI | Met; Earl approved the direction 2026-10-24 (ADR-012) | Screenshots and this review |
 | Navigation functions | Met | Both flow tests; back, restart and rotation covered |
@@ -111,5 +119,6 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
   after process death and reboot (3), rendered screens (40), end-to-end flows under Robolectric
   (2), and the device flow on an emulator with accessibility checks (1).
 - Physical phone: `DeviceFlowTest` passed on a Samsung Galaxy Note10+ 5G (Android 12) over USB,
-  in 42 seconds, with the same accessibility checks.
+  in 42 seconds, with the same accessibility checks. Re-run on 2026-11-16 on `main` (`6446efa`)
+  over wireless debugging after a fresh install: passed in 44.8 seconds.
 - Lint: no issues.

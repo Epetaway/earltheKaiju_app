@@ -110,6 +110,27 @@ are fixed.
 
 The hand-held checks are still to come: sound in a loud room, glare and sweaty hands.
 
+## 2026-11-16 · Re-run on the phone after the fixes
+
+**Setup.** Kaiju Coach had been deleted from the phone, so this was a fresh install of the
+build merged into `main`. This time the phone connected over wireless debugging, not USB.
+
+**Result.** The full class flow passed again, in 44.8 seconds. Every screen it captures now
+clears the 3-button navigation bar, including the class timer, snackbars and the end of
+scrolling screens, the issues found on 2026-10-24.
+
+**What the re-run caught.** Two tooling problems, not app problems:
+- Over Wi‑Fi, adb lists the phone twice, which confused the runner.
+- The old test package from October had been signed by a different CI build, so Android
+  wouldn't update it.
+
+The runner now handles both. The second one points at a real risk for later: CI debug builds
+can't update each other in place, so before real class data lives in the app, it needs a stable
+signing key (kept as a secret, never committed).
+
+**Screenshots.** The 17 captures, cropped to the app with the system bars removed, went into
+Earl's screenshot library (`Dev/Screenshots/earltheKaiju/`, `*-samsung.png`) with alt text.
+
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.
