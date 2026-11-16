@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.earlthekaiju.coach.MainActivity
@@ -59,7 +60,7 @@ class DeviceFlowTest {
         waitForText("No programs yet")
         tap("Add program")
         fill("Name", "Adult Fundamentals")
-        tap("Save program")
+        tapAfterTyping("Save program")
         waitGone("Save program")
         waitForText("Adult Fundamentals")
         shot("d02-programs")
@@ -85,11 +86,11 @@ class DeviceFlowTest {
         fill("Lesson title", "Guard Retention")
         tap("Untitled segment")
         fill("Title", "Positional sparring")
-        tap("Done")
+        tapAfterTyping("Done")
         waitGone("EDIT SEGMENT")
         tap("Add segment")
         fill("Title", "Guard retention concepts")
-        tap("Done")
+        tapAfterTyping("Done")
         waitGone("EDIT SEGMENT")
         tapDescription("Move segment 3 up")
         shot("d04-lesson-builder")
@@ -146,7 +147,7 @@ class DeviceFlowTest {
         Thread.sleep(1_000)
         fill("Add a note", "Frames landed. Sparring ran long.")
         shot("d11-post-class")
-        tap("Done")
+        tapAfterTyping("Done")
         waitForText("TODAY")
 
         // History survives an activity restart.
@@ -229,6 +230,19 @@ class DeviceFlowTest {
     private fun SemanticsNodeInteraction.scrollIfNeeded() = apply { runCatching { performScrollTo() } }
 
     private fun tap(label: String) = compose.onNode(hasText(label) and hasClickAction()).scrollIfNeeded().performClick()
+
+    /**
+     * Taps a button right after typing. The keyboard is still sliding in at that point, and the
+     * layout moves with it, so a tap can land where the button was a moment ago (it happened once
+     * on Android 17: the segment sheet never closed). Close the keyboard and let the layout
+     * settle first, as a person would before reaching for a button under the keyboard.
+     */
+    private fun tapAfterTyping(label: String) {
+        runCatching { Espresso.closeSoftKeyboard() }
+        compose.waitForIdle()
+        Thread.sleep(600)
+        tap(label)
+    }
 
     private fun tapDescription(description: String, substring: Boolean = false) {
         compose.onAllNodes(hasContentDescription(description, substring = substring) and hasClickAction()).onFirst().scrollIfNeeded().performClick()

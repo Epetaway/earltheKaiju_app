@@ -59,6 +59,7 @@ Severity: **High** blocks real use in class · **Medium** degrades it · **Low**
 | 30 | Re-installing on the phone failed: the old test package came from a different CI build, and each build signs with its own debug key (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). | Tooling | The runner replaces the test package, which holds no data. It never uninstalls the app itself, which may hold real classes and students, and explains the choice instead. | `a84998c` |
 | 31 | No safe way to keep the app on a phone holding real data: every CI build had its own signing key, so an update meant uninstalling (and losing everything), and installing needed the Mac and adb. | High | A signed personal build from `main`, published as a GitHub Release at a fixed link the phone opens. Stable keys live in a repository secret, never in git. Version codes rise with every build. CI refuses to publish an APK signed by any other key. Details in [10-personal-builds.md](10-personal-builds.md) (ADR-013). | `38f5525` |
 | 32 | On the Android 17 (Pixel 9) emulator the device test crashed before its first tap. The Espresso version that Compose's test library brings in reflects on `InputManager.getInstance`, which Android 17 removed. The app itself was not at fault. | Tooling | Espresso pinned to 3.7.0, which uses the public API. The full class flow then passed on Android 17 with accessibility checks. | `de236ec` |
+| 33 | One Android 17 run timed out with the segment sheet still open: the test tapped *Done* while the keyboard was still sliding in, and the moving layout put the tap somewhere else. | Tooling | After typing, the test closes the keyboard and lets the layout settle before tapping, as a person would. | see PR #3 |
 
 ## Open watch items
 
@@ -78,6 +79,9 @@ These are known and accepted for Sprint 01. None blocks teaching a class.
   mode; decide after real use.
 - **Strings live in Kotlin**, not `strings.xml`. Fine for a single-language private app; move
   them before any translation.
+- **The segment sheet's *Done* sits at the bottom**, below notes and techniques. With the
+  keyboard up, you scroll to reach it (finding #33 came from exactly that spot). A *Done* in the
+  sheet's header would always be in reach; decide after real use.
 - **Restore from a backup isn't built.** Export works, so a backup exists, but getting it back
   into the app is a Sprint 02 item. Until then, never uninstall the personal build to get past an
   install error ([10-personal-builds.md](10-personal-builds.md#update-it)).
