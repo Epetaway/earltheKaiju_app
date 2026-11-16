@@ -6,9 +6,10 @@ Built by Earl Hickson Jr. — BJJ black belt, instructor, graphic designer and f
 Kaiju Coach keeps what I need on the mat in one place: today's class, lesson plans, a round timer,
 attendance and my roster. It works with no internet connection, and student data stays on the phone.
 
-> **Status — Sprint 01** (branch `sprint/01-foundation`): functional MVP of Today, Planner, Lesson
-> builder, Class Mode, Timer, Students, Attendance, Technique library and Settings; media library and
-> desktop sync are designed, not built. `main` stays stable.
+> **Status — Sprint 01, merged into `main`:** working MVP of Today, Planner, Lesson builder, Class
+> Mode, Timer, Students, Attendance, Technique library and Settings. The media library and desktop
+> sync are designed, not built. Every merge into `main` that passes CI becomes a signed personal
+> build for my phone ([install it](#install-it-on-your-phone)).
 
 | Today | Class Mode | Timer | Attendance |
 |---|---|---|---|
@@ -29,6 +30,16 @@ All 45 screen states are in [`docs/screenshots/sprint-01`](docs/screenshots/spri
 
 The public website is a separate project and is not part of this repository.
 
+## Install it on your phone
+
+On the Android phone, open this link in Chrome:
+**https://github.com/Epetaway/earltheKaiju_app/releases/latest/download/kaiju-coach.apk**
+
+Allow Chrome to install unknown apps when Android asks, then tap Install. The same link always
+gets the newest build, and an update installs over the app without touching its data. Full steps,
+what to do if an install is refused, and how signing works:
+[docs/10-personal-builds.md](docs/10-personal-builds.md).
+
 ## Build and run
 
 Requirements: a current Android Studio release that supports AGP 9.3 (it will offer to download
@@ -42,10 +53,10 @@ cd android
 ./gradlew lintDebug
 ```
 
-Or download the debug APK from the latest successful run in the repository's **Actions** tab
-(artifact `kaiju-coach-debug-apk`) and install it on the phone. The debug build installs alongside
-any future release build (`com.earlthekaiju.coach.debug`) and has **Settings › Load sample data**
-for trying the app with fictional students.
+The debug build is **Kaiju Test** (`com.earlthekaiju.coach.debug`). It installs beside the
+personal build with its own data, and it has **Settings › Load sample data** for trying the app
+with fictional students. CI's debug APK is also in each run's **Actions** artifacts
+(`kaiju-coach-debug-apk`).
 
 ### Run it on your phone
 
@@ -57,11 +68,12 @@ wireless debugging (`adb pair`, then `adb connect`). Put CI's two APKs (or your 
 bash android/scripts/run-on-phone.sh
 ```
 
-It installs the debug app and runs the full class-flow test on the phone, with accessibility
+It installs Kaiju Test and runs the full class-flow test on the phone, with accessibility
 checks. Screenshots and logs go to `device-test/<time>/`, which is git-ignored because they show
-your status bar. The app stays installed afterward. CI debug builds are each signed with their own
-key, so if the app on the phone came from a different build, the script stops rather than
-uninstalling it and deleting its data.
+your status bar. Kaiju Test stays installed afterward, and the personal build is never touched.
+CI debug builds share one signing key, so each installs over the last. If the Kaiju Test on the
+phone was signed by another key, the script stops rather than uninstalling it and deleting its
+data.
 
 ## Documentation
 
@@ -74,10 +86,12 @@ uninstalling it and deleting its data.
 7. [Timer: Android behavior and limits](docs/07-timer-platform-behavior.md)
 8. [QA review](docs/08-qa-review.md)
 9. [Dependency verification](docs/09-dependency-verification.md)
-10. [Case-study log](docs/case-study-log.md)
+10. [Personal builds: install, update, signing](docs/10-personal-builds.md)
+11. [Case-study log](docs/case-study-log.md)
 
 ## Privacy
 
-No real student records, credentials, keystores or private media are committed. Android cloud
-backup is disabled for the app; backups are explicit JSON exports the instructor saves. See
+No real student records, credentials, keystores or private media are committed. Signing keys
+live only in a GitHub Actions secret and the owner's password manager. Android cloud backup is
+disabled for the app; backups are explicit JSON exports the instructor saves. See
 [`NOTICE.md`](NOTICE.md) for code, brand and font ownership.

@@ -136,7 +136,7 @@ jobs:
       matrix:
         include:
           - device: Pixel 9, Android 17
-            api-level: 37
+            api-level: '37.0'       # Android 17's emulator images are named android-37.0
             profile: pixel_9
             report: device          # also publishes the APKs android/scripts/run-on-phone.sh uses
           - device: Pixel 7, Android 15
@@ -158,16 +158,6 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
-      - name: List emulator images and device profiles (temporary probe)
-        continue-on-error: true
-        shell: bash
-        run: |
-          B="$ANDROID_HOME/cmdline-tools/latest/bin"
-          IMG="$("$B/sdkmanager" --list 2>/dev/null | awk '{print $1}' | grep -E '^system-images;android-3[6-9]' | grep x86_64 | sort -u | paste -sd' ')"
-          DEV="$("$B/avdmanager" list device -c 2>/dev/null | grep -iE 'pixel_(8|9|10)' | paste -sd' ')"
-          echo "::notice title=images::$IMG"
-          echo "::notice title=profiles::$DEV"
 
       - name: Unpack the CI debug key
         env:
