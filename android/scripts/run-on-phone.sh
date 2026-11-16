@@ -34,25 +34,26 @@ done
 
 # Pick one phone. With wireless debugging adb can list the same phone twice (ip:port and an
 # mDNS name); either entry works. ANDROID_SERIAL, if already set, wins.
+# Sets ANDROID_SERIAL and STATE in this shell (not in a $(...) subshell, which would lose them).
 pick_device() {
   if [ -z "${ANDROID_SERIAL:-}" ]; then
     local first
     first="$("$ADB" devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
     [ -n "$first" ] && export ANDROID_SERIAL="$first"
   fi
-  "$ADB" get-state 2>&1 || true
+  STATE="$("$ADB" get-state 2>&1 || true)"
 }
 
 say "Phones connected"
 "$ADB" devices -l
-STATE="$(pick_device)"
+pick_device
 if [ "$STATE" != "device" ]; then
   # A stale adb server is a common cause; restart it once before giving up.
   "$ADB" kill-server > /dev/null 2>&1 || true
   "$ADB" start-server > /dev/null 2>&1 || true
   sleep 2
   "$ADB" devices -l
-  STATE="$(pick_device)"
+  pick_device
 fi
 if [ "$STATE" != "device" ]; then
   say "Samsung devices on this Mac's USB bus (serial numbers left out)"
@@ -108,7 +109,7 @@ install_apk() { # $1 apk, $2 package, $3 disposable|keep
 }
 
 say "Installing the debug app and its test"
-echo "Phone: $ANDROID_SERIAL"
+echo "Phone: ${ANDROID_SERIAL:-}"
 install_apk "$APP_APK" "$APP_ID" keep || { echo "Install failed (see above)."; exit 1; }
 install_apk "$TEST_APK" "$APP_ID.test" disposable || { echo "Test install failed (see above)."; exit 1; }
 
