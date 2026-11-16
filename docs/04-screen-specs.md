@@ -209,7 +209,7 @@ Engine and platform behavior: [07-timer-platform-behavior.md](07-timer-platform-
 | 01 Data & sync | Status panel: *Saved on this phone · OFFLINE-READY*, "Desktop sync isn't set up yet", paired computer *None*, last backup export (gold *Never* until one exists). **Export backup** (confirm warns the file contains student names; SAF file picker). |
 | 02 Timer | Round sounds, vibration, keep screen on. |
 | 03 Teaching | Programs (list, add/edit sheet with audience and planner accent, delete with consequences explained). |
-| 04 About | Crest, version, privacy statement, font licenses, current theme. |
-| 05 Debug build only | Load fictional sample data. |
+| 04 About | Crest, version and build number (matches the GitHub release), privacy statement, font licenses, current theme. |
+| 05 Debug build only ("Kaiju Test") | Load fictional sample data. Not in the personal build. |
 
 Not shown because they don't exist yet: pairing, sync now, conflicts, restore, theme switch.

@@ -132,6 +132,25 @@ KAIJU_SIGNING_DIR=~/kaiju-signing KAIJU_BUILD_NUMBER=<newer than the phone's> ./
 rm -rf ~/kaiju-signing
 ```
 
+## `main` is protected
+
+Every personal build comes from `main`, so `main` only changes through a pull request whose
+checks pass. The repository ruleset **Protect main** (GitHub › Settings › Rules › Rulesets):
+
+| Setting | Value |
+|---|---|
+| Enforcement | Active |
+| Target | The default branch (`main`) |
+| Restrict deletions | On |
+| Block force pushes | On |
+| Require a pull request before merging | On, 0 approvals (a one-person project) |
+| Require status checks to pass | `Build, test, lint, screenshots` · `Device run (Pixel 9, Android 17)` · `Device run (Pixel 7, Android 15)` |
+| Bypass list | Empty |
+
+Renaming a CI job renames its check, so update the ruleset in the same pull request, or merges
+will wait on a check that never reports. *Publish personal build* is not required: it only runs
+after the merge.
+
 ## Running the automated phone test on the Pixel
 
 `android/scripts/run-on-phone.sh` works over USB or wireless debugging (README). It installs
