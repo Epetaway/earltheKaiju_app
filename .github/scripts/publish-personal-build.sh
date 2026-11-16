@@ -5,14 +5,14 @@
 # Runs only for main, after every check has passed, with an APK check-apk.sh has already
 # confirmed is signed by the personal key. Keeps the 10 newest builds.
 set -euo pipefail
+trap 'echo "::error::publish-personal-build.sh stopped at line $LINENO: $BASH_COMMAND"' ERR
 
 : "${KAIJU_BUILD_NUMBER:?}" "${CERT_SHA256:?}" "${GH_TOKEN:?}"
 SRC=android/app/build/outputs/apk/release/app-release.apk
 APK="$RUNNER_TEMP/kaiju-coach.apk"
 cp "$SRC" "$APK"
 
-BT="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)"
-VERSION="$("$BT/aapt2" dump badging "$APK" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)"
+VERSION="$(sed -n 's/^ *versionName = "\([^"]*\)".*/\1/p' android/app/build.gradle.kts | head -n 1)"
 TAG="build-${KAIJU_BUILD_NUMBER}"
 SUBJECT="$(git log -1 --format=%s "$GITHUB_SHA")"
 LINK="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/kaiju-coach.apk"

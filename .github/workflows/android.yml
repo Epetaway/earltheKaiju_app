@@ -70,8 +70,11 @@ jobs:
         run: |
           # With the secret, debug builds must carry the stable CI debug key (or the phone can't update them).
           EXPECTED=any; [ "${{ steps.keys.outputs.signed }}" = true ] && EXPECTED="$CI_DEBUG_CERT_SHA256"
-          bash .github/scripts/check-apk.sh android/app/build/outputs/apk/debug/app-debug.apk "$EXPECTED"
-          bash .github/scripts/check-apk.sh android/app/build/outputs/apk/release/app-release.apk any
+          ls android/app/build/outputs/apk/*/ > ci-signing.log
+          {
+            bash .github/scripts/check-apk.sh android/app/build/outputs/apk/debug/app-debug.apk "$EXPECTED" &&
+            bash .github/scripts/check-apk.sh android/app/build/outputs/apk/release/app-release.apk any
+          } 2>&1 | tee -a ci-signing.log
 
       - name: Unit tests and screenshots (Robolectric + Roborazzi)
         id: tests

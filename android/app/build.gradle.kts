@@ -170,4 +170,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    // Compose's test library brings an older Espresso that crashes on Android 17 (it reflects on
+    // InputManager.getInstance, which is gone). 3.7.0 uses the public API.
+    androidTestImplementation(libs.androidx.test.espresso.core)
 }

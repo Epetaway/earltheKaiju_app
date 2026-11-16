@@ -22,6 +22,7 @@ run). Versions live in `android/gradle/libs.versions.toml`.
 | kotlinx.serialization | 1.12.0 | klibs.io (Oct 19, 2026) | — |
 | Robolectric | 4.17 | robolectric-bazel releases (Sept 2026) | Tests run on SDK 35. |
 | Roborazzi | 1.76.0 | klibs.io (Sept 29, 2026) | Chosen over Paparazzi because Paparazzi ≤ 2.0.0-alpha04 has known AGP 9 issues. |
+| Espresso core (instrumented tests only) | 3.7.0 | developer.android.com · AndroidX Test releases (checked 2026-11-16) | Pinned above the version Compose's test library brings in. That older Espresso reflects on `InputManager.getInstance`, which Android 17 removed, so every test failed on the Pixel 9 / Android 17 emulator. 3.7.0 "uses getSystemService instead of reflective InputManager.getInstance". |
 
 ## SDK levels
 
