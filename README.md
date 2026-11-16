@@ -49,7 +49,8 @@ for trying the app with fictional students.
 
 ### Run it on your phone
 
-Plug an Android phone into the Mac with USB debugging on, put CI's two APKs (or your own
+Connect an Android phone to the Mac, either over USB with USB debugging on or over Wi‑Fi with
+wireless debugging (`adb pair`, then `adb connect`). Put CI's two APKs (or your own
 `assembleDebug assembleDebugAndroidTest` outputs) in `device-test/apk/`, then:
 
 ```bash
@@ -58,7 +59,9 @@ bash android/scripts/run-on-phone.sh
 
 It installs the debug app and runs the full class-flow test on the phone, with accessibility
 checks. Screenshots and logs go to `device-test/<time>/`, which is git-ignored because they show
-your status bar. The app stays installed afterward.
+your status bar. The app stays installed afterward. CI debug builds are each signed with their own
+key, so if the app on the phone came from a different build, the script stops rather than
+uninstalling it and deleting its data.
 
 ## Documentation
 

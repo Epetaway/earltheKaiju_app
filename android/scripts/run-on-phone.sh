@@ -32,16 +32,28 @@ for f in "$APP_APK" "$TEST_APK"; do
   [ -f "$f" ] || { echo "Missing $f"; exit 1; }
 done
 
+# Pick one phone. With wireless debugging adb can list the same phone twice (ip:port and an
+# mDNS name); either entry works. ANDROID_SERIAL, if already set, wins.
+# Sets ANDROID_SERIAL and STATE in this shell (not in a $(...) subshell, which would lose them).
+pick_device() {
+  if [ -z "${ANDROID_SERIAL:-}" ]; then
+    local first
+    first="$("$ADB" devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+    [ -n "$first" ] && export ANDROID_SERIAL="$first"
+  fi
+  STATE="$("$ADB" get-state 2>&1 || true)"
+}
+
 say "Phones connected"
 "$ADB" devices -l
-STATE="$("$ADB" get-state 2>&1 || true)"
+pick_device
 if [ "$STATE" != "device" ]; then
   # A stale adb server is a common cause; restart it once before giving up.
   "$ADB" kill-server > /dev/null 2>&1 || true
   "$ADB" start-server > /dev/null 2>&1 || true
   sleep 2
   "$ADB" devices -l
-  STATE="$("$ADB" get-state 2>&1 || true)"
+  pick_device
 fi
 if [ "$STATE" != "device" ]; then
   say "Samsung devices on this Mac's USB bus (serial numbers left out)"
@@ -74,9 +86,32 @@ mkdir -p "$OUT/shots"
   echo "Font scale: $("$ADB" shell settings get system font_scale | tr -d '\r')"
 } | tee "$OUT/device.txt"
 
+# Each CI build signs with its own debug key, so Android may refuse to update an earlier install
+# in place (INSTALL_FAILED_UPDATE_INCOMPATIBLE). The test package holds no data and is simply
+# replaced. The app itself may hold your own classes and students, so it is never removed here.
+install_apk() { # $1 apk, $2 package, $3 disposable|keep
+  local out
+  out="$("$ADB" install -r -t "$1" 2>&1)"; echo "$out"
+  echo "$out" | grep -q "^Success" && return 0
+  if echo "$out" | grep -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE"; then
+    if [ "$3" = "disposable" ]; then
+      echo "Replacing the earlier $2 (signed by another build; it holds no data)."
+      "$ADB" uninstall "$2" > /dev/null 2>&1 || true
+      "$ADB" install -r -t "$1" && return 0
+    else
+      echo
+      echo "The Kaiju Coach debug app on the phone came from another build, so Android won't"
+      echo "update it in place. Removing it deletes the classes and students saved in it."
+      echo "If that's fine, uninstall Kaiju Coach on the phone, then run this again."
+    fi
+  fi
+  return 1
+}
+
 say "Installing the debug app and its test"
-"$ADB" install -r -t "$APP_APK" || { echo "Install failed (see above)."; exit 1; }
-"$ADB" install -r -t "$TEST_APK" || { echo "Test install failed (see above)."; exit 1; }
+echo "Phone: ${ANDROID_SERIAL:-}"
+install_apk "$APP_APK" "$APP_ID" keep || { echo "Install failed (see above)."; exit 1; }
+install_apk "$TEST_APK" "$APP_ID.test" disposable || { echo "Test install failed (see above)."; exit 1; }
 
 say "Running the class flow on the phone (about 2 minutes; keep the phone unlocked and untouched)"
 "$ADB" shell rm -rf /data/local/tmp/kaiju
