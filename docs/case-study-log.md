@@ -156,6 +156,12 @@ uninstalling, and uninstalling deletes everything.
 - The keys were generated outside the repository and handed over in a git-ignored folder. Their
   passwords were never printed.
 
+**What Android 17 caught.** The first run on the Pixel 9 / Android 17 emulator failed before
+its first tap. The Android 17 failure was in the test tooling, not the app: the Espresso
+version that Compose's test library pulls in calls an Android method that Android 17 removed.
+Pinning Espresso 3.7.0 fixed it. The whole class flow then passed on Android 17, accessibility
+checks included.
+
 **Constraint found.** The AI development environment can't write repository secrets or rules.
 That's a sensible limit for an automated agent. So the two steps that hand over trust (adding
 the key, protecting `main`) are done by Earl, with the steps written down.
