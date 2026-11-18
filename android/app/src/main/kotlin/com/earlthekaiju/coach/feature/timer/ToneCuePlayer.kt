@@ -2,6 +2,8 @@ package com.earlthekaiju.coach.feature.timer
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.os.Build
@@ -10,6 +12,8 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import com.earlthekaiju.coach.domain.timer.TimerCue
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.sin
@@ -17,7 +21,14 @@ import kotlin.math.sin
 /**
  * Round cues made in code: a struck-bell sound (three inharmonic partials with exponential decay),
  * short wood-block clicks for the warning, and plain beeps for the 3-2-1 count-in. No audio files,
- * so there is nothing to license. Played on the media stream so a gym Bluetooth speaker gets them.
+ * so there is nothing to license.
+ *
+ * Output (Sprint 02): by default cues play on the **alarm** stream, so lowering the music (media
+ * volume) never quiets the bell. [useAlarmStream] = false puts them back on the media stream,
+ * which follows a Bluetooth speaker exactly like the music does. Either way, each burst of cues
+ * asks for transient, may-duck audio focus: the music app dips under the bell and comes back up.
+ * Focus is held across back-to-back cues (the 3-2-1 count-in) and given back shortly after the
+ * last one, so the music dips once instead of pumping on every beep.
  *
  * Patterns: round start = two bell strikes · rest = one low bell · warning = three clicks ·
  * count-in = one beep per second · finished = three bells.
@@ -31,12 +42,20 @@ class ToneCuePlayer(context: Context) : CuePlayer {
         context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
     }
 
-    private val audioExecutor = Executors.newSingleThreadExecutor { r -> Thread(r, "kaiju-cues").apply { isDaemon = true } }
+    /** Set from Settings › "Bells stay loud over music". Read on the audio thread at play time. */
+    @Volatile var useAlarmStream: Boolean = true
+
+    private val audioManager: AudioManager? = context.getSystemService(AudioManager::class.java)
+    private val audioExecutor = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "kaiju-cues").apply { isDaemon = true } }
     private val cache = HashMap<TimerCue, ShortArray>()
+
+    // Touched only on the audio thread.
+    private var focus: AudioFocusRequest? = null
+    private var releaseFocus: ScheduledFuture<*>? = null
 
     override fun play(cue: TimerCue, sound: Boolean, vibration: Boolean) {
         if (vibration) vibrate(cue)
-        if (sound) audioExecutor.execute { runCatching { playPcm(pcmFor(cue)) } }
+        if (sound) audioExecutor.execute { runCatching { playWithDucking(pcmFor(cue)) } }
     }
 
     private fun vibrate(cue: TimerCue) {
@@ -64,14 +83,33 @@ class ToneCuePlayer(context: Context) : CuePlayer {
         }
     }
 
-    private fun playPcm(pcm: ShortArray) {
+    private fun playWithDucking(pcm: ShortArray) {
+        val attributes = AudioAttributes.Builder()
+            .setUsage(if (useAlarmStream) AudioAttributes.USAGE_ALARM else AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        releaseFocus?.cancel(false)
+        if (focus == null) {
+            focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(attributes)
+                .build()
+                .also { audioManager?.requestAudioFocus(it) }
+        }
+        try {
+            playPcm(pcm, attributes)
+        } finally {
+            releaseFocus = audioExecutor.schedule({ abandonFocus() }, FOCUS_HOLD_MILLIS, TimeUnit.MILLISECONDS)
+        }
+    }
+
+    private fun abandonFocus() {
+        focus?.let { audioManager?.abandonAudioFocusRequest(it) }
+        focus = null
+    }
+
+    private fun playPcm(pcm: ShortArray, attributes: AudioAttributes) {
         val track = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build(),
-            )
+            .setAudioAttributes(attributes)
             .setAudioFormat(
                 AudioFormat.Builder()
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
@@ -93,6 +131,9 @@ class ToneCuePlayer(context: Context) : CuePlayer {
 
     private companion object {
         const val SAMPLE_RATE = 44_100
+
+        /** Keep the music ducked this long after a cue, so a 3-2-1 count-in dips it only once. */
+        const val FOCUS_HOLD_MILLIS = 1_500L
 
         fun bell(freq: Double, seconds: Double): DoubleArray {
             val n = (SAMPLE_RATE * seconds).toInt()

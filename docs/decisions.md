@@ -118,3 +118,28 @@ infrastructure and no Play Store listing.
   registration possible.
 
 Details: [10-personal-builds.md](10-personal-builds.md).
+
+### ADR-014 · Lock-screen timer: foreground service, wake lock, cues on the alarm stream
+
+**Decision (Sprint 02, 2026-11-18).**
+- A `specialUse` foreground service (`TimerService`) keeps a running timer alive with the phone
+  locked. It shows an ongoing notification with Pause/Resume and Reset.
+- A partial wake lock is held only while a round is running, so cues fire on time with the screen
+  off. Exact alarms aren't used.
+- Cues play on the **alarm** stream by default and take transient may-duck audio focus.
+  Settings › "Bells stay loud over music" switches them back to the media stream.
+
+**Why.**
+- This is the foundation for the Class Hub and pre-built class flows. Music, cues and
+  auto-advancing segments all have to keep going with the phone locked or in a pocket.
+- Music control will set the phone's media volume. On the media stream, turning the music down
+  would also turn the bell down.
+- `specialUse` is the only service type that fits an interval timer (docs/07). The app is
+  sideloaded, so there's no Play review.
+
+**Cost.**
+- Battery use while a round runs with the screen off: one wake lock for the length of the
+  program.
+- Alarm-stream audio routing to Bluetooth speakers varies by phone, hence the setting.
+- Android 12+ won't start the service from the background. A run restored while the app is
+  closed counts correctly but gets its notification the next time the app opens.

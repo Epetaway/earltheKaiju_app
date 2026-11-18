@@ -83,6 +83,7 @@ class SettingsViewModel(private val c: AppContainer) : ViewModel() {
     fun setSound(v: Boolean) = viewModelScope.launch { c.settings.setTimerSound(v) }
     fun setVibration(v: Boolean) = viewModelScope.launch { c.settings.setTimerVibration(v) }
     fun setKeepScreenOn(v: Boolean) = viewModelScope.launch { c.settings.setKeepScreenOn(v) }
+    fun setCuesOnAlarm(v: Boolean) = viewModelScope.launch { c.settings.setCuesOnAlarmStream(v) }
     fun loadSample(done: () -> Unit) = viewModelScope.launch { c.sampleData.load(); done() }
 }
 
@@ -91,6 +92,7 @@ data class SettingsActions(
     val onSound: (Boolean) -> Unit = {},
     val onVibration: (Boolean) -> Unit = {},
     val onKeepScreenOn: (Boolean) -> Unit = {},
+    val onCuesOnAlarm: (Boolean) -> Unit = {},
     val onExport: () -> Unit = {},
     val onPrograms: () -> Unit = {},
     val onLoadSample: () -> Unit = {},
@@ -128,6 +130,7 @@ fun SettingsDestination(onBack: () -> Unit, onPrograms: () -> Unit) {
             onSound = { vm.setSound(it) },
             onVibration = { vm.setVibration(it) },
             onKeepScreenOn = { vm.setKeepScreenOn(it) },
+            onCuesOnAlarm = { vm.setCuesOnAlarm(it) },
             onExport = { exportLauncher.launch("kaiju-coach-backup-${container.clock.today()}.json") },
             onPrograms = onPrograms,
             onLoadSample = { vm.loadSample { scope.launch { snackbar.showSnackbar("Sample data loaded") } } },
@@ -164,7 +167,19 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                 )
 
                 SectionHeader("Timer", index = 2, modifier = Modifier.padding(top = KaijuSpace.xl))
-                KaijuSwitchRow("Round sounds", state.settings.timerSound, actions.onSound, subtitle = "Bells and the 3-2-1 count-in, on the media volume", icon = KaijuIcons.SoundOn)
+                KaijuSwitchRow("Round sounds", state.settings.timerSound, actions.onSound, subtitle = "Bells and the 3-2-1 count-in. Music dips under them.", icon = KaijuIcons.SoundOn)
+                HairlineDivider(Modifier.fillMaxWidth())
+                KaijuSwitchRow(
+                    "Bells stay loud over music",
+                    state.settings.cuesOnAlarmStream,
+                    actions.onCuesOnAlarm,
+                    subtitle = if (state.settings.cuesOnAlarmStream) {
+                        "Bells use the alarm volume, so turning music down never quiets them"
+                    } else {
+                        "Bells use the media volume and follow a Bluetooth speaker with the music"
+                    },
+                    icon = KaijuIcons.Timer,
+                )
                 HairlineDivider(Modifier.fillMaxWidth())
                 KaijuSwitchRow("Vibration", state.settings.timerVibration, actions.onVibration, subtitle = "Buzz at round changes", icon = KaijuIcons.Vibrate)
                 HairlineDivider(Modifier.fillMaxWidth())
