@@ -4,6 +4,13 @@
     <!-- Haptic feedback for timer round transitions. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Lock-screen timer (docs/07): a foreground service with an ongoing notification, and a
+         partial wake lock held only while a round is running so cues ring with the screen off. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name=".KaijuCoachApp"
         android:allowBackup="false"
@@ -25,6 +32,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".feature.timer.TimerService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Interval timer for martial-arts training rounds" />
+        </service>
     </application>
 
 </manifest>

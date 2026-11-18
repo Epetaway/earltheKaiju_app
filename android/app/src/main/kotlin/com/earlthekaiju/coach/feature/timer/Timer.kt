@@ -1,5 +1,10 @@
 package com.earlthekaiju.coach.feature.timer
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import android.os.Build
+import android.Manifest
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.animation.animateColorAsState
@@ -135,11 +140,24 @@ fun TimerDestination(onBack: (() -> Unit)? = null) {
     val state by vm.state.collectAsStateWithLifecycle()
     val running = state.timer.snapshot.status == TimerStatus.RUNNING || state.timer.snapshot.status == TimerStatus.PAUSED
     KeepScreenOn(state.keepScreenOn && running)
+    // The lock-screen timer notification needs permission on Android 13+. Ask when Start is
+    // pressed (the moment it matters); the timer starts either way, and still runs locked
+    // without it, just without the notification controls.
+    val context = LocalContext.current
+    val askNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     TimerScreen(
         state,
         TimerActions(
             onBack = onBack,
-            onToggle = vm::toggle,
+            onToggle = {
+                if (!running &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    !TimerService.canNotify(context)
+                ) {
+                    askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                vm.toggle()
+            },
             onReset = vm::reset,
             onSelect = vm::select,
             onUseCustom = vm::useCustom,

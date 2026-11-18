@@ -22,6 +22,8 @@ data class AppSettings(
     val timerSound: Boolean = true,
     val timerVibration: Boolean = true,
     val keepScreenOn: Boolean = true,
+    /** Cues on the alarm volume (true) so turning music down never quiets the bell; false = media volume. */
+    val cuesOnAlarmStream: Boolean = true,
     val lastBackupAt: Long? = null,
 )
 
@@ -46,6 +48,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
         val timerSound = booleanPreferencesKey("timer_sound")
         val timerVibration = booleanPreferencesKey("timer_vibration")
         val keepScreenOn = booleanPreferencesKey("keep_screen_on")
+        val cuesOnAlarmStream = booleanPreferencesKey("cues_on_alarm_stream")
         val lastBackupAt = longPreferencesKey("last_backup_at")
         val deviceId = stringPreferencesKey("device_id")
         val presetsSeeded = booleanPreferencesKey("presets_seeded")
@@ -64,6 +67,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
             timerSound = p[Keys.timerSound] ?: true,
             timerVibration = p[Keys.timerVibration] ?: true,
             keepScreenOn = p[Keys.keepScreenOn] ?: true,
+            cuesOnAlarmStream = p[Keys.cuesOnAlarmStream] ?: true,
             lastBackupAt = p[Keys.lastBackupAt],
         )
     }
@@ -71,6 +75,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
     suspend fun setTimerSound(enabled: Boolean) = store.edit { it[Keys.timerSound] = enabled }
     suspend fun setTimerVibration(enabled: Boolean) = store.edit { it[Keys.timerVibration] = enabled }
     suspend fun setKeepScreenOn(enabled: Boolean) = store.edit { it[Keys.keepScreenOn] = enabled }
+    suspend fun setCuesOnAlarmStream(enabled: Boolean) = store.edit { it[Keys.cuesOnAlarmStream] = enabled }
     suspend fun setLastBackupAt(epochMillis: Long) = store.edit { it[Keys.lastBackupAt] = epochMillis }
 
     /** A random id for this install; the future desktop sync uses it to name the phone. */

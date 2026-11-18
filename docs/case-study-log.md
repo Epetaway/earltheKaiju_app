@@ -172,4 +172,4 @@ makes registering the app possible then.
 ## Next entries
 
 - First class taught with the app: what helped, what got in the way, what changed.
-- Sprint 02 decisions (timer foreground service, restore, schema v2 for sync).
+- Sprint 02: restore and schema v2. (The lock-screen timer is ADR-014.)

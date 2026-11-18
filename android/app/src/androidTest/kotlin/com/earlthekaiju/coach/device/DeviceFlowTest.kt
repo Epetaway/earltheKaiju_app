@@ -1,6 +1,8 @@
 package com.earlthekaiju.coach.device
 
+import android.Manifest
 import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -45,6 +47,12 @@ class DeviceFlowTest {
 
     @Before fun setUp() {
         shell("mkdir -p $shotDir")
+        // Pressing Start asks for notification permission (lock-screen timer). Grant it up front so
+        // the system dialog doesn't cover the app; the test then also runs the foreground service.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            instrumentation.uiAutomation.grantRuntimePermission(instrumentation.targetContext.packageName, Manifest.permission.POST_NOTIFICATIONS)
+        }
         // Label, contrast, touch-target and traversal checks run on every action below.
         compose.enableAccessibilityChecks()
     }

@@ -56,6 +56,13 @@ class AppContainer(
     val sampleData = SampleData(clock, programs, lessons, techniques, sessions, students, attendance)
     val timer = TimerController(appScope, clock, settings, cuePlayer, bootCounter)
 
+    init {
+        // Cue stream follows Settings › "Bells stay loud over music".
+        if (cuePlayer is ToneCuePlayer) {
+            appScope.launch { settings.settings.collect { cuePlayer.useAlarmStream = it.cuesOnAlarmStream } }
+        }
+    }
+
     fun onAppStart() {
         appScope.launch { timerPresets.seedDefaultsIfNeeded() }
     }
