@@ -63,6 +63,7 @@ import com.earlthekaiju.coach.feature.classmode.PostClassDestination
 import com.earlthekaiju.coach.feature.lessons.LessonEditorDestination
 import com.earlthekaiju.coach.feature.library.LibraryDestination
 import com.earlthekaiju.coach.feature.library.TechniqueEditorDestination
+import com.earlthekaiju.coach.feature.media.VideoDestination
 import com.earlthekaiju.coach.feature.planner.PlannerActions
 import com.earlthekaiju.coach.feature.planner.PlannerDestination
 import com.earlthekaiju.coach.feature.planner.SessionDetailActions
@@ -230,6 +231,7 @@ private fun KaijuNavHost(nav: NavHostController, modifier: Modifier) {
                 LibraryDestination(
                     onOpenTechnique = { nav.navigate(TechniqueEditorRoute(it)) },
                     onAddTechnique = { nav.navigate(TechniqueEditorRoute()) },
+                    onOpenVideo = { nav.navigate(VideoRoute(it)) },
                     onOpenSettings = openSettings,
                 )
             }
@@ -287,7 +289,10 @@ private fun KaijuNavHost(nav: NavHostController, modifier: Modifier) {
                 onOpenSession = { nav.navigate(SessionDetailRoute(it)) },
             )
         }
-        composable<TechniqueEditorRoute> { TechniqueEditorDestination(onClose = back) }
+        composable<TechniqueEditorRoute> {
+            TechniqueEditorDestination(onClose = back, onOpenVideo = { mediaId, clipId -> nav.navigate(VideoRoute(mediaId, clipId)) })
+        }
+        composable<VideoRoute> { VideoDestination(onBack = back) }
         composable<SettingsRoute> { SettingsDestination(onBack = back, onPrograms = { nav.navigate(ProgramsRoute) }) }
         composable<ProgramsRoute> { ProgramsDestination(onBack = back) }
     }

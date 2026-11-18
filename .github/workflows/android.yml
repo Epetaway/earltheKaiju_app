@@ -119,7 +119,6 @@ jobs:
           path: |
             android/app/build/reports/
             android/app/build/outputs/roborazzi/
-            android/app/schemas/
           retention-days: 14
           if-no-files-found: ignore
 

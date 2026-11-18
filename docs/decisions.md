@@ -143,3 +143,22 @@ Details: [10-personal-builds.md](10-personal-builds.md).
 - Alarm-stream audio routing to Bluetooth speakers varies by phone, hence the setting.
 - Android 12+ won't start the service from the background. A run restored while the app is
   closed counts correctly but gets its notification the next time the app opens.
+
+### ADR-015 · Media library: private copies, clips as bookmarks, Media3
+
+**Decision (Sprint 03, 2026-11-18).**
+- Imported videos are **copied** into the app's private folder rather than referenced in place.
+  Earl asked for a private folder. Copies also can't be broken by the gallery moving or deleting
+  the original.
+- Clips are start/end bookmarks played with ExoPlayer clipping. There's no re-encoding.
+- Media3 1.11.1 (`exoplayer`, `ui`) with a TextureView `PlayerView` and the app's own Compose
+  controls.
+- The media tables stay out of the JSON backup. *Save all to a folder* exports the videos plus a
+  labels file.
+
+**Why.**
+- Private, labelled, quick to study (loop, slow, mirror), and nothing is invisible or fake.
+- Copies cost storage. The tab shows the total, and deleting frees space right away.
+
+**Supersedes** the Sprint 01 concept ("reference videos already on the phone; nothing is
+copied"). That changed at Earl's request.

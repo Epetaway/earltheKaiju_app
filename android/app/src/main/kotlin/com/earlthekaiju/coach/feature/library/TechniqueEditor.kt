@@ -1,5 +1,11 @@
 package com.earlthekaiju.coach.feature.library
 
+import androidx.compose.material3.Text
+import com.earlthekaiju.coach.data.media.MediaRepository
+import com.earlthekaiju.coach.data.media.MediaVideo
+import com.earlthekaiju.coach.designsystem.component.KaijuListRow
+import com.earlthekaiju.coach.designsystem.component.SectionHeader
+import kotlinx.coroutines.flow.flowOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -60,14 +66,18 @@ data class TechniqueEditorUiState(
     val categories: List<String> = emptyList(),
     val nameError: String? = null,
     val done: Boolean = false,
+    /** Library videos that show this technique, on the whole video or a clip. */
+    val videos: List<MediaVideo> = emptyList(),
 )
 
 class TechniqueEditorViewModel(private val c: AppContainer, handle: SavedStateHandle) : ViewModel() {
     private val id = handle.toRoute<TechniqueEditorRoute>().techniqueId
     private val form = MutableStateFlow(TechniqueEditorUiState())
 
-    val state: StateFlow<TechniqueEditorUiState> = combine(form, c.techniques.observeAll()) { f, all ->
-        f.copy(categories = all.map { it.technique.category }.filter { it.isNotBlank() }.distinct().sorted())
+    private val videos = if (id == null) flowOf(emptyList()) else c.media.observeForTechnique(id)
+
+    val state: StateFlow<TechniqueEditorUiState> = combine(form, c.techniques.observeAll(), videos) { f, all, v ->
+        f.copy(categories = all.map { it.technique.category }.filter { it.isNotBlank() }.distinct().sorted(), videos = v)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), form.value)
 
     init {
@@ -101,11 +111,11 @@ class TechniqueEditorViewModel(private val c: AppContainer, handle: SavedStateHa
 }
 
 @Composable
-fun TechniqueEditorDestination(onClose: () -> Unit) {
+fun TechniqueEditorDestination(onClose: () -> Unit, onOpenVideo: (mediaId: String, clipId: String?) -> Unit = { _, _ -> }) {
     val vm = kaijuViewModel { c, h -> TechniqueEditorViewModel(c, h) }
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.done) { if (state.done) onClose() }
-    TechniqueEditorScreen(state, onClose, vm::update, { vm.save() }, { vm.delete() })
+    TechniqueEditorScreen(state, onClose, vm::update, { vm.save() }, { vm.delete() }, onOpenVideo)
 }
 
 @Composable
@@ -115,6 +125,7 @@ fun TechniqueEditorScreen(
     onUpdate: ((TechniqueDraft) -> TechniqueDraft) -> Unit,
     onSave: () -> Unit,
     onDelete: () -> Unit,
+    onOpenVideo: (mediaId: String, clipId: String?) -> Unit = { _, _ -> },
 ) {
     val colors = Kaiju.colors
     var confirmDelete by remember { mutableStateOf(false) }
@@ -164,6 +175,9 @@ fun TechniqueEditorScreen(
                     minLines = 4,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 )
+                if (!state.isNew && d.id != null) {
+                    TechniqueVideos(d.id, state.videos, onOpenVideo)
+                }
                 if (!state.isNew) {
                     Spacer(Modifier.height(KaijuSpace.l))
                     KaijuButton("Delete technique", { confirmDelete = true }, Modifier.fillMaxWidth(), variant = ButtonVariant.Danger, icon = KaijuIcons.Delete)
@@ -187,5 +201,40 @@ fun TechniqueEditorScreen(
             onConfirm = { confirmDelete = false; onDelete() },
             onDismiss = { confirmDelete = false },
         )
+    }
+}
+
+/** "Videos" on a technique's page: each video, and the clips inside it that show this technique. */
+@Composable
+private fun TechniqueVideos(techniqueId: String, videos: List<MediaVideo>, onOpen: (String, String?) -> Unit) {
+    val colors = Kaiju.colors
+    SectionHeader(if (videos.isEmpty()) "Videos" else "Videos · ${videos.size}", modifier = Modifier.padding(top = KaijuSpace.l))
+    if (videos.isEmpty()) {
+        Text(
+            "No videos yet. In Library › Media, label a video or a clip with this technique and it shows up here.",
+            style = Kaiju.type.bodyS,
+            color = colors.inkMuted,
+        )
+        return
+    }
+    videos.forEach { v ->
+        val clips = v.clips.filter { c -> c.techniques.any { it.id == techniqueId } }
+        val wholeVideo = v.techniques.any { it.id == techniqueId }
+        KaijuListRow(
+            title = v.item.title,
+            subtitle = if (wholeVideo || clips.isEmpty()) "Whole video" else null,
+            icon = KaijuIcons.Video,
+            value = if (v.item.durationMs > 0) MediaRepository.clockLabel(v.item.durationMs) else null,
+            onClick = { onOpen(v.id, null) },
+        )
+        clips.forEach { c ->
+            KaijuListRow(
+                title = c.clip.title,
+                subtitle = "Clip · ${MediaRepository.clockLabel(c.clip.startMs)}–${MediaRepository.clockLabel(c.clip.endMs)}",
+                icon = KaijuIcons.Clip,
+                onClick = { onOpen(v.id, c.id) },
+                modifier = Modifier.padding(start = KaijuSpace.m),
+            )
+        }
     }
 }

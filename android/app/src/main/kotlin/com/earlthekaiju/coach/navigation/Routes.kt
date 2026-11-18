@@ -32,5 +32,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class StudentEditorRoute(val studentId: String? = null)
 @Serializable data class StudentDetailRoute(val studentId: String)
 @Serializable data class TechniqueEditorRoute(val techniqueId: String? = null)
+/** A video in the media library; [clipId] opens it playing that clip. */
+@Serializable data class VideoRoute(val mediaId: String, val clipId: String? = null)
 @Serializable object SettingsRoute
 @Serializable object ProgramsRoute
