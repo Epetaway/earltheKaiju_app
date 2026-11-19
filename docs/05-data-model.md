@@ -1,7 +1,8 @@
 # 05 · Data model
 
-Room (SQLite) on the phone is the source of truth. Schema version 1 is exported to
-`android/app/schemas/` so every later version ships with a tested migration.
+Room (SQLite) on the phone is the source of truth. Schemas are exported to
+`android/app/schemas/` so every later version ships with a tested migration. Version 2
+(Sprint 03) added the media library tables; see [11-media-library.md](11-media-library.md).
 
 ## Entity relationships
 
@@ -122,15 +123,23 @@ deletion, its tombstone can be removed.
 
 ## Migrations
 
-- `exportSchema = true`; the generated `1.json` is committed with the schema it describes.
+- `exportSchema = true`; each version's generated JSON is committed under `android/app/schemas/`.
+  (`1.json` was first committed in Sprint 03. CI also publishes the current schema to the
+  `ci-reports` branch.)
+- **1 → 2** (Sprint 03): `KaijuMigrations.MIGRATION_1_2` creates `media_item`, `media_clip`,
+  `media_technique` and `clip_technique`. Nothing existing changes. `MediaLibraryTest` builds a
+  real version-1 database from `1.json`, migrates it, and checks the data survives and the new
+  tables work.
 - No `fallbackToDestructiveMigration()`. Losing a roster is not an acceptable failure mode.
-- Each future version adds a `Migration(n, n+1)` (or an `@AutoMigration` with a spec when Room can
-  infer it) and a test using `MigrationTestHelper` against the exported schemas, run in CI.
+- Each future version adds a `Migration(n, n+1)` and a test that opens a database built from the
+  previous version's exported schema, run in CI.
 - Enum columns are stored by name. Renaming an enum constant is a migration.
 
 ## Backup format
 
-Settings › Export backup writes every table, tombstones included, to a JSON file the instructor
+Settings › Export backup writes every Sprint 01 table, tombstones included, to a JSON file the instructor
 chooses (Storage Access Framework). The format is versioned and described for the desktop
 companion in [`contracts/kaiju-coach-backup.v1.schema.json`](../contracts/kaiju-coach-backup.v1.schema.json).
+The media tables and video files aren't in it: Library › Media › Save all to a folder copies the
+videos plus `kaiju-media-labels.json` (titles, labels, clips) instead.
 Restore is planned for Sprint 02 (see [06-sync-architecture.md](06-sync-architecture.md)).

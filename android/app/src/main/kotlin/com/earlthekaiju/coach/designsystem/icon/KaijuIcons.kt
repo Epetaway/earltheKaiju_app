@@ -102,6 +102,19 @@ object KaijuIcons {
     }
     val Archive by lazy { icon("Archive", stroke = listOf("M3.5 4h17v4h-17z", "M5 8v12h14V8", "M10 12h4")) }
     val Copy by lazy { icon("Copy", stroke = listOf("M8 8h12v12H8z", "M16 8V4H4v12h4")) }
+
+    // Media library (Sprint 03).
+    val Import by lazy { icon("Import", stroke = listOf("M12 4v10.5", "M7 10l5 5 5-5", "M5 15v5h14v-5")) }
+    val Share by lazy {
+        icon("Share", stroke = listOf(
+            "M9 12a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0z", "M20 6a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0z",
+            "M20 18a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0z", "M8.75 10.75l6.5-3.5", "M8.75 13.25l6.5 3.5",
+        ))
+    }
+    val Loop by lazy { icon("Loop", stroke = listOf("M4 11V9.5A3.5 3.5 0 0 1 7.5 6H19", "M16 3l3 3-3 3", "M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H5", "M8 21l-3-3 3-3")) }
+    val Mirror by lazy { icon("Mirror", stroke = listOf("M12 3v18", "M9 7L4 17h5z", "M15 7l5 10h-5z")) }
+    val Speed by lazy { icon("Speed", stroke = listOf("M4.5 17a8 8 0 1 1 15 0", "M12 15l3.5-5")) }
+    val Clip by lazy { icon("Clip", stroke = listOf("M7 4h10v16l-5-4-5 4z")) }
 }
 
 private fun icon(

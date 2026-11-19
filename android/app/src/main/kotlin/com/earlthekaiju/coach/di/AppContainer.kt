@@ -10,6 +10,9 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.earlthekaiju.coach.data.backup.BackupExporter
 import com.earlthekaiju.coach.data.db.KaijuDatabase
+import com.earlthekaiju.coach.data.media.MediaFiles
+import com.earlthekaiju.coach.data.media.MediaRepository
+import com.earlthekaiju.coach.data.media.MediaTransfers
 import com.earlthekaiju.coach.data.prefs.SettingsRepository
 import com.earlthekaiju.coach.data.repo.AttendanceRepository
 import com.earlthekaiju.coach.data.repo.LessonRepository
@@ -29,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Manual dependency injection: one object that builds the app's long-lived pieces.
@@ -55,6 +59,8 @@ class AppContainer(
     val backup = BackupExporter(database, settings, clock)
     val sampleData = SampleData(clock, programs, lessons, techniques, sessions, students, attendance)
     val timer = TimerController(appScope, clock, settings, cuePlayer, bootCounter)
+    val media = MediaRepository(database, clock, MediaFiles(File(context.filesDir, "media")))
+    val mediaTransfers = MediaTransfers(context.applicationContext, media, clock, appScope)
 
     init {
         // Cue stream follows Settings › "Bells stay loud over music".

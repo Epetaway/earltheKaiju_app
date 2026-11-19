@@ -18,6 +18,7 @@ run). Versions live in `android/gradle/libs.versions.toml`.
 | Navigation Compose | 2.10.2 | AndroidX stable channel | Type-safe routes via kotlinx.serialization. |
 | Room | 2.8.5 | AndroidX stable channel | KSP2; schema export via the `androidx.room` Gradle plugin. Room 3 (`androidx.room3`) is stable too but a new package; staying on 2.8 for now. |
 | DataStore | 1.2.1 | AndroidX stable channel | Preferences. |
+| Media3 (ExoPlayer, UI) | 1.11.1 | developer.android.com · Media3 releases (stable 1.11.1, Sept 10 2026; checked 2026-11-18) | Media library playback (Sprint 03). Only `media3-exoplayer` and `media3-ui` (for `PlayerView` with a TextureView, so the mirror flip works). No unstable APIs used. |
 | kotlinx.coroutines | 1.11.0 | Maven listing (May 2026) | — |
 | kotlinx.serialization | 1.12.0 | klibs.io (Oct 19, 2026) | — |
 | Robolectric | 4.17 | robolectric-bazel releases (Sept 2026) | Tests run on SDK 35. |

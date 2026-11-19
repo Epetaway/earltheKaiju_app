@@ -453,3 +453,94 @@ interface BackupDao {
     @Query("SELECT * FROM attendance") suspend fun attendance(): List<AttendanceEntity>
     @Query("SELECT * FROM timer_preset") suspend fun timerPresets(): List<TimerPresetEntity>
 }
+
+/** One technique attached to a video ([clipId] null) or to one of its clips. */
+data class MediaTechniqueLink(
+    val mediaId: String,
+    val clipId: String?,
+    val techniqueId: String,
+    val techniqueName: String,
+)
+
+@Dao
+interface MediaDao {
+    @Query("SELECT * FROM media_item WHERE deletedAt IS NULL ORDER BY createdAt DESC")
+    fun observeItems(): Flow<List<MediaItemEntity>>
+
+    @Query("SELECT * FROM media_clip WHERE deletedAt IS NULL ORDER BY startMs")
+    fun observeClips(): Flow<List<MediaClipEntity>>
+
+    @Query(
+        """
+        SELECT mt.mediaId AS mediaId, NULL AS clipId, t.id AS techniqueId, t.name AS techniqueName
+            FROM media_technique mt JOIN technique t ON t.id = mt.techniqueId
+            WHERE t.deletedAt IS NULL
+        UNION ALL
+        SELECT c.mediaId AS mediaId, c.id AS clipId, t.id AS techniqueId, t.name AS techniqueName
+            FROM clip_technique ct
+            JOIN media_clip c ON c.id = ct.clipId
+            JOIN technique t ON t.id = ct.techniqueId
+            WHERE t.deletedAt IS NULL AND c.deletedAt IS NULL
+        """,
+    )
+    fun observeTechniqueLinks(): Flow<List<MediaTechniqueLink>>
+
+    @Query("SELECT * FROM media_item WHERE id = :id")
+    suspend fun get(id: String): MediaItemEntity?
+
+    @Query("SELECT * FROM media_item WHERE deletedAt IS NULL")
+    suspend fun liveItems(): List<MediaItemEntity>
+
+    @Query("SELECT * FROM media_clip WHERE id = :id")
+    suspend fun getClip(id: String): MediaClipEntity?
+
+    @Insert
+    suspend fun insert(item: MediaItemEntity)
+
+    @Upsert
+    suspend fun upsert(item: MediaItemEntity)
+
+    @Upsert
+    suspend fun upsertClip(clip: MediaClipEntity)
+
+    @Query("DELETE FROM media_technique WHERE mediaId = :mediaId")
+    suspend fun clearTechniques(mediaId: String)
+
+    @Insert
+    suspend fun insertTechniques(refs: List<MediaTechniqueCrossRef>)
+
+    @Query("DELETE FROM clip_technique WHERE clipId = :clipId")
+    suspend fun clearClipTechniques(clipId: String)
+
+    @Insert
+    suspend fun insertClipTechniques(refs: List<ClipTechniqueCrossRef>)
+
+    @Transaction
+    suspend fun saveDetails(item: MediaItemEntity, techniqueIds: List<String>) {
+        upsert(item)
+        clearTechniques(item.id)
+        if (techniqueIds.isNotEmpty()) insertTechniques(techniqueIds.distinct().map { MediaTechniqueCrossRef(item.id, it) })
+    }
+
+    @Transaction
+    suspend fun saveClip(clip: MediaClipEntity, techniqueIds: List<String>) {
+        upsertClip(clip)
+        clearClipTechniques(clip.id)
+        if (techniqueIds.isNotEmpty()) insertClipTechniques(techniqueIds.distinct().map { ClipTechniqueCrossRef(clip.id, it) })
+    }
+
+    @Query("UPDATE media_clip SET deletedAt = :now, updatedAt = :now WHERE id = :id")
+    suspend fun softDeleteClip(id: String, now: Long)
+
+    @Transaction
+    suspend fun softDelete(id: String, now: Long) {
+        markDeleted(id, now)
+        markClipsDeleted(id, now)
+    }
+
+    @Query("UPDATE media_item SET deletedAt = :now, updatedAt = :now WHERE id = :id")
+    suspend fun markDeleted(id: String, now: Long)
+
+    @Query("UPDATE media_clip SET deletedAt = :now, updatedAt = :now WHERE mediaId = :id AND deletedAt IS NULL")
+    suspend fun markClipsDeleted(id: String, now: Long)
+}

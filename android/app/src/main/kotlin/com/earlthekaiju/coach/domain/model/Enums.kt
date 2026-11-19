@@ -111,3 +111,12 @@ private object BeltColors {
     const val Green = 0xFF3E8C4A
     const val Black = 0xFF111312
 }
+
+/** What a video in the media library shows. Stored by name; never rename without a migration. */
+enum class MediaKind(val label: String) {
+    INSTRUCTION("Instruction"),
+    DRILLING("Drilling"),
+    ROLLING("Rolling"),
+    COMPETITION("Competition"),
+    OTHER("Other"),
+}

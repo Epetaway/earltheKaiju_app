@@ -1,6 +1,12 @@
 package com.earlthekaiju.coach.screenshots
 
 import com.earlthekaiju.coach.data.db.ClassSessionEntity
+import com.earlthekaiju.coach.domain.model.MediaKind
+import com.earlthekaiju.coach.data.media.TechniqueRef
+import com.earlthekaiju.coach.data.media.MediaVideo
+import com.earlthekaiju.coach.data.media.MediaClip
+import com.earlthekaiju.coach.data.db.MediaItemEntity
+import com.earlthekaiju.coach.data.db.MediaClipEntity
 import com.earlthekaiju.coach.data.db.LessonPlanEntity
 import com.earlthekaiju.coach.data.db.LessonPlanSummary
 import com.earlthekaiju.coach.data.db.ProgramEntity
@@ -161,5 +167,29 @@ object Fx {
     val notes = listOf(
         SessionNoteEntity("n1", "s-fund", "Knee shield recovery clicked once they framed on the collarbone first.", T, T),
         SessionNoteEntity("n2", "s-fund", "Sam needs more reps on hip escapes — pair with Lena next week.", T, T),
+    )
+
+    // Media library (Sprint 03). Fictional titles; no real files.
+    private fun mediaItem(id: String, title: String, kind: MediaKind, position: String, minutes: Long, minors: Boolean = false) = MediaItemEntity(
+        id = id, title = title, fileName = "$id.mp4", mimeType = "video/mp4", sizeBytes = minutes * 120_000_000L,
+        durationMs = minutes * 60_000L + 17_000L, width = 1920, height = 1080, kind = kind, position = position,
+        showsStudents = minors, showsMinors = minors, recordedAt = T, createdAt = T, updatedAt = T,
+    )
+    private fun ref(i: Int) = TechniqueRef(techniques[i].technique.id, techniques[i].technique.name)
+    private fun clip(id: String, mediaId: String, title: String, startS: Long, endS: Long, vararg t: Int) =
+        MediaClip(MediaClipEntity(id, mediaId, title, startS * 1000, endS * 1000, createdAt = T, updatedAt = T), t.map(::ref))
+
+    val videos = listOf(
+        MediaVideo(
+            mediaItem("m1", "Guard retention seminar", MediaKind.INSTRUCTION, "Open guard", 42),
+            listOf(ref(0), ref(1)),
+            listOf(
+                clip("c1", "m1", "Frame, then hip escape", 95, 141, 0),
+                clip("c2", "m1", "Knee shield when they step in", 612, 668, 1),
+                clip("c3", "m1", "Inversion recovery", 1490, 1532, 2),
+            ),
+        ),
+        MediaVideo(mediaItem("m2", "Knee cut, both sides", MediaKind.DRILLING, "Half guard", 3), listOf(ref(5)), emptyList()),
+        MediaVideo(mediaItem("m3", "Kids class positional rounds", MediaKind.ROLLING, "Mount", 6, minors = true), emptyList(), emptyList()),
     )
 }

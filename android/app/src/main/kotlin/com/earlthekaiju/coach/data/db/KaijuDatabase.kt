@@ -19,7 +19,7 @@ class Converters {
 }
 
 /**
- * Version 1 of the on-device database. Schemas are exported to android/app/schemas so every
+ * The on-device database (version 2 since Sprint 03's media library). Schemas are exported to android/app/schemas so every
  * future version ships with a tested Migration (see docs/05-data-model.md, "Migrations").
  * There is deliberately no fallbackToDestructiveMigration: losing a roster is not acceptable.
  */
@@ -37,8 +37,12 @@ class Converters {
         AttendanceEntity::class,
         TimerPresetEntity::class,
         SessionNoteEntity::class,
+        MediaItemEntity::class,
+        MediaClipEntity::class,
+        MediaTechniqueCrossRef::class,
+        ClipTechniqueCrossRef::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -51,12 +55,14 @@ abstract class KaijuDatabase : RoomDatabase() {
     abstract fun attendanceDao(): AttendanceDao
     abstract fun timerPresetDao(): TimerPresetDao
     abstract fun backupDao(): BackupDao
+    abstract fun mediaDao(): MediaDao
 
     companion object {
         const val FILE_NAME = "kaiju-coach.db"
 
         fun build(context: Context): KaijuDatabase =
             Room.databaseBuilder(context.applicationContext, KaijuDatabase::class.java, FILE_NAME)
+                .addMigrations(*KaijuMigrations.ALL)
                 .build()
 
         fun inMemory(context: Context): KaijuDatabase =

@@ -47,6 +47,13 @@ import com.earlthekaiju.coach.feature.lessons.LessonEditorActions
 import com.earlthekaiju.coach.feature.lessons.LessonEditorScreen
 import com.earlthekaiju.coach.feature.lessons.LessonEditorUiState
 import com.earlthekaiju.coach.feature.library.LibraryActions
+import com.earlthekaiju.coach.feature.media.VideoUiState
+import com.earlthekaiju.coach.feature.media.VideoScreen
+import com.earlthekaiju.coach.feature.media.VideoActions
+import com.earlthekaiju.coach.feature.media.PlayerControls
+import com.earlthekaiju.coach.feature.media.MediaTabState
+import com.earlthekaiju.coach.data.media.TransferState
+import com.earlthekaiju.coach.data.media.TechniqueRef
 import com.earlthekaiju.coach.feature.library.LibraryScreen
 import com.earlthekaiju.coach.feature.library.LibraryUiState
 import com.earlthekaiju.coach.feature.planner.DetailSegment
@@ -349,8 +356,47 @@ class ScreenshotTest {
         Frame(TopLevel.LIBRARY) { LibraryScreen(LibraryUiState(loading = false, techniques = Fx.techniques), LibraryActions()) }
     }
 
-    @Test fun s08b_library_media_concept() = snap("08b-library-media-concept") {
-        Frame(TopLevel.LIBRARY) { LibraryScreen(LibraryUiState(loading = false, showMedia = true, techniques = Fx.techniques), LibraryActions()) }
+    @Test fun s08b_library_media() = snap("08b-library-media") {
+        Frame(TopLevel.LIBRARY) {
+            LibraryScreen(
+                LibraryUiState(loading = false, showMedia = true, techniques = Fx.techniques, media = MediaTabState(videos = Fx.videos, usedBytes = 6_100_000_000L)),
+                LibraryActions(),
+            )
+        }
+    }
+
+    @Test fun s08c_library_media_empty() = snap("08c-library-media-empty") {
+        Frame(TopLevel.LIBRARY) {
+            LibraryScreen(
+                LibraryUiState(
+                    loading = false, showMedia = true, techniques = Fx.techniques,
+                    media = MediaTabState(transfer = TransferState(TransferState.Kind.IMPORT, running = true, total = 3, done = 1, current = "PXL_20261118_183012.mp4")),
+                ),
+                LibraryActions(),
+            )
+        }
+    }
+
+    @Config(qualifiers = PHONE_TALL)
+    @Test fun s08d_video() = snap("08d-video") {
+        VideoScreen(
+            VideoUiState(
+                loading = false, video = Fx.videos.first(), playingClipId = null, markInMs = 95_000L,
+                allTechniques = Fx.techniques.map { TechniqueRef(it.technique.id, it.technique.name) },
+            ),
+            PlayerControls(positionMs = 141_000L, durationMs = Fx.videos.first().item.durationMs, speed = 0.5f, loop = true),
+            VideoActions(),
+            surface = { m -> Box(m) },
+        )
+    }
+
+    @Test fun s08e_video_clip_playing() = snap("08e-video-clip") {
+        VideoScreen(
+            VideoUiState(loading = false, video = Fx.videos.first(), playingClipId = "c2"),
+            PlayerControls(isPlaying = true, positionMs = 21_000L, durationMs = 56_000L, loop = true, mirror = true, sound = false),
+            VideoActions(),
+            surface = { m -> Box(m) },
+        )
     }
 
     @Test fun s09_settings() = snap("09-settings") {

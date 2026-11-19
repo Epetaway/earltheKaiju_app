@@ -9,6 +9,7 @@ import com.earlthekaiju.coach.data.backup.LocalTimeIso
 import com.earlthekaiju.coach.domain.model.AttendanceStatus
 import com.earlthekaiju.coach.domain.model.Audience
 import com.earlthekaiju.coach.domain.model.Belt
+import com.earlthekaiju.coach.domain.model.MediaKind
 import com.earlthekaiju.coach.domain.model.ProgramColor
 import com.earlthekaiju.coach.domain.model.SegmentKind
 import com.earlthekaiju.coach.domain.model.SessionStatus
@@ -272,4 +273,85 @@ data class SessionNoteEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val deletedAt: Long? = null,
+)
+
+/*
+ * Version 2 (Sprint 03): the private media library. See docs/11-media-library.md.
+ *
+ *  - The video file itself lives in the app's private folder (filesDir/media), never in the
+ *    database and never in the JSON backup. [MediaItemEntity.fileName] is the name inside it.
+ *  - Clips are bookmarks inside a video (start/end in milliseconds): no copies, no re-encoding.
+ *  - Techniques attach to a whole video and/or to a clip.
+ */
+@Entity(tableName = "media_item")
+data class MediaItemEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    /** File name inside the app's private media folder. */
+    val fileName: String,
+    val mimeType: String,
+    val sizeBytes: Long,
+    val durationMs: Long,
+    val width: Int,
+    val height: Int,
+    val kind: MediaKind = MediaKind.INSTRUCTION,
+    /** Free text, e.g. "Closed guard", "Half guard". */
+    val position: String = "",
+    val notes: String = "",
+    /** Shows students other than the instructor. Sharing asks first. */
+    val showsStudents: Boolean = false,
+    /** Shows anyone under 18. Sharing asks first, with a stronger warning. */
+    val showsMinors: Boolean = false,
+    /** When the video was recorded, from the file's metadata, if known. */
+    val recordedAt: Long? = null,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
+)
+
+@Entity(
+    tableName = "media_clip",
+    foreignKeys = [
+        ForeignKey(entity = MediaItemEntity::class, parentColumns = ["id"], childColumns = ["mediaId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("mediaId")],
+)
+data class MediaClipEntity(
+    @PrimaryKey val id: String,
+    val mediaId: String,
+    val title: String,
+    val startMs: Long,
+    val endMs: Long,
+    val notes: String = "",
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
+)
+
+@Entity(
+    tableName = "media_technique",
+    primaryKeys = ["mediaId", "techniqueId"],
+    foreignKeys = [
+        ForeignKey(entity = MediaItemEntity::class, parentColumns = ["id"], childColumns = ["mediaId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TechniqueEntity::class, parentColumns = ["id"], childColumns = ["techniqueId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("techniqueId")],
+)
+data class MediaTechniqueCrossRef(
+    val mediaId: String,
+    val techniqueId: String,
+)
+
+@Entity(
+    tableName = "clip_technique",
+    primaryKeys = ["clipId", "techniqueId"],
+    foreignKeys = [
+        ForeignKey(entity = MediaClipEntity::class, parentColumns = ["id"], childColumns = ["clipId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TechniqueEntity::class, parentColumns = ["id"], childColumns = ["techniqueId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("techniqueId")],
+)
+data class ClipTechniqueCrossRef(
+    val clipId: String,
+    val techniqueId: String,
 )
