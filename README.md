@@ -6,10 +6,14 @@ Built by Earl Hickson Jr. — BJJ black belt, instructor, graphic designer and f
 Kaiju Coach keeps what I need on the mat in one place: today's class, lesson plans, a round timer,
 attendance and my roster. It works with no internet connection, and student data stays on the phone.
 
-> **Status — Sprint 01, merged into `main`:** working MVP of Today, Planner, Lesson builder, Class
-> Mode, Timer, Students, Attendance, Technique library and Settings. The media library and desktop
-> sync are designed, not built. Every merge into `main` that passes CI becomes a signed personal
-> build for my phone ([install it](#install-it-on-your-phone)).
+> **Status:** Sprints 01–03 are merged into `main`. They cover Today, Planner, Lesson builder,
+> Class Mode, Timer (it keeps running and sounding with the phone locked), Students, Attendance,
+> Technique library, a private video library and Settings. Desktop sync is designed, not built.
+> Every merge into `main` that passes CI becomes a signed personal build for my phone
+> ([install it](#install-it-on-your-phone)).
+>
+> **Evaluating this project?** Start with the [project wiki](docs/wiki/README.md): the problem,
+> design, architecture, key decisions, quality and lessons, with links into the detailed docs.
 
 | Today | Class Mode | Timer | Attendance |
 |---|---|---|---|
