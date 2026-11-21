@@ -1,0 +1,93 @@
+/home/runner/work/earltheKaiju_app/earltheKaiju_app/android/app/src/main/kotlin/com/earlthekaiju/coach/feature/media/VideoPlayer.kt:177: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
+            (LayoutInflater.from(ctx).inflate(R.layout.kaiju_player_view, null, false) as PlayerView).also { it.player = state.player }
+                                                                          ~~~~
+
+   Explanation for issues of type "InflateParams":
+   When inflating a layout, avoid passing in null as the parent view, since
+   otherwise any layout parameters on the root of the inflated layout will be
+   ignored.
+
+   https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
+
+/home/runner/work/earltheKaiju_app/earltheKaiju_app/android/app/src/main/kotlin/com/earlthekaiju/coach/data/media/MediaRepository.kt:81: Warning: Consider also using StorageManager#getAllocatableBytes and allocateBytes which will consider clearable cached data [UsableSpace]
+        return root.usableSpace
+                    ~~~~~~~~~~~
+
+   Explanation for issues of type "UsableSpace":
+   When you need to allocate disk space for large files, consider using the
+   new allocateBytes(FileDescriptor, long) API, which will automatically clear
+   cached files belonging to other apps (as needed) to meet your request.
+
+   When deciding if the device has enough disk space to hold your new data,
+   call getAllocatableBytes(UUID) instead of using getUsableSpace(), since the
+   former will consider any cached data that the system is willing to clear on
+   your behalf.
+
+   Note that these methods require API level 26. If your app is running on
+   older devices, you will probably need to use both APIs, conditionally
+   switching on Build.VERSION.SDK_INT. Lint only looks in the same compilation
+   unit to see if you are already using both APIs, so if it warns even though
+   you are already using the new API, consider moving the calls to the same
+   file or suppressing the warning.
+
+/home/runner/work/earltheKaiju_app/earltheKaiju_app/android/app/src/main/kotlin/com/earlthekaiju/coach/data/media/MediaTransfers.kt:196: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+            val thumb = if (scale < 1f) Bitmap.createScaledBitmap(frame, THUMB_WIDTH, (frame.height * scale).toInt().coerceAtLeast(1), true) else frame
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 3 warnings

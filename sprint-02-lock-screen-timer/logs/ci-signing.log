@@ -1,0 +1,16 @@
+android/app/build/outputs/apk/debug/:
+app-debug.apk
+output-metadata.json
+
+android/app/build/outputs/apk/release/:
+app-release.apk
+baselineProfiles
+output-metadata.json
+Build tools: 37.0.0
+package: name='com.earlthekaiju.coach.debug' versionCode='36' versionName='0.1.0-debug' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+V2 Signer: certificate DN: CN=Kaiju Coach CI debug builds, O=Earl the Kaiju
+V2 Signer: certificate SHA-256 digest: 68e0a664047a986dcc70675dde76909bf84afeac4156a3509cd3cd4eef37b3e1
+Build tools: 37.0.0
+package: name='com.earlthekaiju.coach' versionCode='36' versionName='0.1.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+V2 Signer: certificate DN: CN=Throwaway CI check
+V2 Signer: certificate SHA-256 digest: e8263558be5aedbb02ee4926197054cb2bd057cb32c5b4b1866646c3376a97f5

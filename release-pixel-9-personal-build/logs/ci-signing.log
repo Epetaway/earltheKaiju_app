@@ -1,0 +1,16 @@
+android/app/build/outputs/apk/debug/:
+app-debug.apk
+output-metadata.json
+
+android/app/build/outputs/apk/release/:
+app-release.apk
+baselineProfiles
+output-metadata.json
+Build tools: 37.0.0
+package: name='com.earlthekaiju.coach.debug' versionCode='33' versionName='0.1.0-debug' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+V2 Signer: certificate DN: C=US, O=Android, CN=Android Debug
+V2 Signer: certificate SHA-256 digest: 7a376a54e49f56b9120ff3b47db236f34cfd16cf90f7da5a602f00656299e226
+Build tools: 37.0.0
+package: name='com.earlthekaiju.coach' versionCode='33' versionName='0.1.0' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+V2 Signer: certificate DN: CN=Throwaway CI check
+V2 Signer: certificate SHA-256 digest: 5f49e932956feb156935a85050449cdcd8b830b7892a1056760deee414531e06
