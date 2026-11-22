@@ -1,0 +1,4 @@
+Android 17 (API 37)
+sdk_gphone64_x86_64
+Physical size: 1080x2424
+Physical density: 420

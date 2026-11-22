@@ -1,0 +1,8 @@
+{
+  "sha": "eb7307d0386e6364769210f47484d675f4cf3ac5",
+  "run_id": "45024442648",
+  "branch": "ci/device-test-text-input",
+  "kind": "build",
+  "assemble": "success", "signing": "success", "tests": "success", "lint": "success",
+  "finished_at": "2026-11-22T12:56:01Z"
+}
