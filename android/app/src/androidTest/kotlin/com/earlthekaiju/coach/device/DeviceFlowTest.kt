@@ -262,7 +262,31 @@ class DeviceFlowTest {
         compose.onNode(matcher).performClick()
     }
 
+    /**
+     * Types into a field. A field inside a sheet that is still animating in can exist in the
+     * semantics tree before the keyboard connection is ready, and performTextInput then fails
+     * with "Failed to perform text input" (seen on the Pixel 7 / Android 15 run, Nov 22, 2026).
+     * Wait for the field, focus it the way a person would, and retry a failed input twice after
+     * the UI settles. A failed attempt types nothing, so a retry can't duplicate text.
+     */
     private fun fill(label: String, text: String) {
-        compose.onNode(hasContentDescription(label) and hasSetTextAction()).scrollIfNeeded().performTextInput(text)
+        val matcher = hasContentDescription(label) and hasSetTextAction()
+        waitFor("field \"$label\"", 15_000) { compose.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(matcher).scrollIfNeeded().performClick()
+        compose.waitForIdle()
+        var lastError: AssertionError? = null
+        repeat(3) { attempt ->
+            try {
+                compose.onNode(matcher).performTextInput(text)
+                return
+            } catch (e: AssertionError) {
+                lastError = e
+                if (attempt < 2) {
+                    Thread.sleep(500)
+                    compose.waitForIdle()
+                }
+            }
+        }
+        throw lastError!!
     }
 }
